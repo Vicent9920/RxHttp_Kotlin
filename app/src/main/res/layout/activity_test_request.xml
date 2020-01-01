@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    tools:context=".ui.TestRequestActivity">
+
+    <TextView
+        android:id="@+id/tv_log"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="5dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:layout_marginTop="15dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:text="有网缓存10秒，无网强制缓存"/>
+
+                <TextView
+                    android:id="@+id/tv_get_singlePoetry"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="1dp"
+                    android:background="#ffff"
+                    android:gravity="center"
+                    android:text="随机单句诗词推荐" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:text="有网强制在线，无网强制缓存"/>
+
+                <TextView
+                    android:id="@+id/tv_get_recommendPoetry"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="1dp"
+                    android:background="#fff"
+                    android:gravity="center"
+                    android:text="随机一首诗词推荐" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:gravity="center"
+                    android:text="BaseUrl重定向"/>
+
+                <EditText
+                    android:id="@+id/et_weather_city"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="#fff"
+                    android:gravity="center"
+                    android:hint="输入获取天气的城市名"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_get_weather"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="#fff"
+                    android:gravity="center"
+                    android:text="获取天气" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:text="异常"/>
+
+                <TextView
+                    android:id="@+id/tv_http_host_error"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="1dp"
+                    android:background="#fff"
+                    android:gravity="center"
+                    android:text="请求地址不存在" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:text="Https"/>
+
+                <TextView
+                    android:id="@+id/tv_https"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="1dp"
+                    android:background="#fff"
+                    android:gravity="center"
+                    android:text="测试Https请求" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

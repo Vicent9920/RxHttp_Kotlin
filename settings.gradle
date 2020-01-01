@@ -1,0 +1,2 @@
+include ':app', ':rxhttp_kt'
+rootProject.name='RxHttp_Kotlin'
