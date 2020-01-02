@@ -42,7 +42,7 @@ class ExceptionHandle constructor(val e: Throwable) {
      * @param e Throwable
      * @return 错误码
      */
-    fun onGetCode(e: Throwable?): Int {
+    private fun onGetCode(e: Throwable?): Int {
         return if (!NetUtils.isConnected()) {
             NET
         } else {
@@ -68,7 +68,7 @@ class ExceptionHandle constructor(val e: Throwable) {
      * @param code 错误码
      * @return 错误信息
      */
-    fun onGetMsg(code: Int): String {
+    private fun onGetMsg(code: Int): String {
         return when (code) {
             NET -> "网络连接失败，请检查网络设置"
             TIMEOUT -> "网络状况不稳定，请稍后重试"

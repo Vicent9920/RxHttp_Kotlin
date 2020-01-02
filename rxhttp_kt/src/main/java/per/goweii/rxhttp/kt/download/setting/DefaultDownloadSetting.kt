@@ -10,7 +10,7 @@ import per.goweii.rxhttp.kt.download.Mode
  * <p>版本号：1<p>
  *
  */
-class DefaultDownloadSetting:DownloadSetting {
+open class DefaultDownloadSetting:DownloadSetting {
     override fun getBaseUrl(): String {
         return "http://api.rxhttp.download/"
     }

@@ -80,8 +80,11 @@ class RxRequest<T, E> where E : BaseResponse<T> {
 
             }
             mListener?.onFinish()
-        }, Action { mListener?.onFinish() },
-                Consumer<Disposable> { mListener?.onStart() })
+        }, Action {
+            mListener?.onFinish()
+        },
+                Consumer<Disposable> {
+                    mListener?.onStart() })
         mRxLife?.add(disposable)
         return disposable
     }

@@ -16,12 +16,12 @@ import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 abstract class DefaultRequestSetting : RequestSetting{
 
 
-    override fun getRedirectBaseUrl(): Map<String, String>? {
-        return null
+    override fun getRedirectBaseUrl(): Map<String, String>{
+        return HashMap()
     }
 
-    override fun getServiceBaseUrl(): Map<Class<*>, String>? {
-        return null
+    override fun getServiceBaseUrl(): Map<Class<*>, String> {
+        return HashMap()
     }
 
 
@@ -53,20 +53,20 @@ abstract class DefaultRequestSetting : RequestSetting{
         return 10*1024*1024
     }
 
-    override fun getStaticPublicQueryParameter(): Map<String, String>? {
-        return null
+    override fun getStaticPublicQueryParameter(): Map<String, String>{
+        return HashMap()
     }
 
-    override fun getDynamicPublicQueryParameter(): Map<String, ParameterGetter>? {
-        return null
+    override fun getDynamicPublicQueryParameter(): Map<String, ParameterGetter> {
+        return HashMap()
     }
 
-    override fun getStaticHeaderParameter(): Map<String, String>? {
-        return null
+    override fun getStaticHeaderParameter(): Map<String, String> {
+        return HashMap()
     }
 
-    override fun getDynamicHeaderParameter(): Map<String, ParameterGetter>? {
-        return null
+    override fun getDynamicHeaderParameter(): Map<String, ParameterGetter> {
+        return HashMap()
     }
 
     override fun <E : ExceptionHandle> getExceptionHandle(): E? {
