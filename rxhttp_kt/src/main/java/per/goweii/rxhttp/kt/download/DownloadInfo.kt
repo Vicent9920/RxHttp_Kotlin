@@ -10,7 +10,7 @@ import per.goweii.rxhttp.kt.core.RxHttp
  * <p>版本号：1<p>
  *
  */
-data class DownloadInfo(var url:String,var saveDirPath:String? = null,var saveFileName:String? = null,var downloadLength:Long = 0,var contentLength: Long = 0) {
+data class DownloadInfo(var url:String,var saveDirPath:String? = null,var saveFileName:String? = null,var downloadLength:Long = 0L,var contentLength: Long = 0) {
 
     @JvmField
     var state: State = State.STOPPED

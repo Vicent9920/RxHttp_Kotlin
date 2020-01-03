@@ -196,6 +196,7 @@ class TestRequestActivity : AppCompatActivity() {
      * 重定向
      * 数据实体非标准实体 ，直接返回的是{@link RegisterBean}
      */
+    @SuppressLint("SetTextI18n")
     private fun singlePoetry() {
 
         mRxLife.add(RxHttp.customRequest(FreeApi.api().singlePoetry())
@@ -210,10 +211,11 @@ class TestRequestActivity : AppCompatActivity() {
      * 获取今日信息
      * 由于SuccessCode 非标准Code,因此返回整个数据实体自定义
      */
+    @SuppressLint("SetTextI18n")
     private fun getCurrentDate() {
         mRxLife.add(
             RxHttp.request(FreeApi.api()
-            .getDate("www.mxnzp.com/api/holiday/single/${getCurrent()}"))
+            .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}"))
             .listener(reqListener)
             .customRequest {
                 // 访问成功
@@ -227,7 +229,7 @@ class TestRequestActivity : AppCompatActivity() {
 
     @SuppressLint("SimpleDateFormat")
     private fun getCurrent(): String {
-        return SimpleDateFormat("yyyy-MM-dd").format(Date())
+        return SimpleDateFormat("yyyyMMdd").format(Date())
     }
 
     override fun onDestroy() {

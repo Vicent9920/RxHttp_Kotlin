@@ -27,7 +27,7 @@ object FreeApi: Api() {
         companion object {
             const val BASE_URL = "https://www.wanandroid.com/"
             const val BASE_URL_OTHER_NAME = "other"
-            const val BASE_URL_OTHER = "https://v1.jinrishici.com/all.json"
+            const val BASE_URL_OTHER = "https://v1.jinrishici.com/"
         }
     }
 
@@ -50,19 +50,21 @@ object FreeApi: Api() {
          * 注册账号
          */
         @POST("user/register")
+        @FormUrlEncoded
         fun register(@Field("username") username: String,
                      @Field("password")password:String,
                      @Field("repassword")repassword:String): Observable<ResponseBean<RegisterBean>>
 
         /**
          * 重定向
+         * 相当于修改了BaseUrl
          */
         @Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
-        @GET("weatherApi")
+        @GET("all.json")
         fun singlePoetry(): Observable<SinglePoetryBean>
 
         /**
-         * http 请求 // www.mxnzp.com/api/holiday/single/20200102
+         * http 请求 // http://www.mxnzp.com/api/holiday/single/20200102
          */
         @GET
         fun getDate(@Url path: String): Observable<ResponseBean<DateData>>
