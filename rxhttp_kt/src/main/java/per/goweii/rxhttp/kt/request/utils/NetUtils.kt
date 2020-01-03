@@ -12,7 +12,7 @@ object NetUtils {
      */
     @SuppressLint("MissingPermission")
     fun isConnected(): Boolean {
-        val connectivityManager = RxHttp.mAppContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = RxHttp.mAppContext!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         if (connectivityManager != null) {
             val networkInfo = connectivityManager.activeNetworkInfo
             if (networkInfo != null) {

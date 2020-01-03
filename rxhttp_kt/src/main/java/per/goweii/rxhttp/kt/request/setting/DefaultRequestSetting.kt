@@ -73,7 +73,7 @@ abstract class DefaultRequestSetting : RequestSetting{
         return null
     }
 
-    override fun getInterceptors(): Array<Interceptor>? {
+    override fun getInterceptors(): Array<Interceptor> {
         return arrayOf()
     }
 

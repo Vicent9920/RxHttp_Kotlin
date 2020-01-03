@@ -23,11 +23,11 @@ fun checkBaseUrl(url: String): String {
     fun getCacheDir(): String {
         var cacheFile: File? = null
         if (isSDCardAlive()) {
-            cacheFile = RxHttp.mAppContext.getExternalCacheDir()
+            cacheFile = RxHttp.mAppContext!!.externalCacheDir
         }
 
         if (cacheFile == null) {
-            cacheFile = RxHttp.mAppContext.cacheDir
+            cacheFile = RxHttp.mAppContext!!.cacheDir
         }
         return cacheFile!!.absolutePath
     }
@@ -37,7 +37,7 @@ fun checkBaseUrl(url: String): String {
     fun getDownloadCacheDir(): String {
         var dir: File? = null
         if (isSDCardAlive()) {
-            dir = RxHttp.mAppContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            dir = RxHttp.mAppContext!!.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         }
         if(dir == null){
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

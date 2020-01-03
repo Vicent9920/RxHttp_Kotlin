@@ -8,6 +8,7 @@ import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
+import per.goweii.rxhttp.kt.request.base.BaseBean
 import per.goweii.rxhttp.kt.request.base.BaseResponse
 import per.goweii.rxhttp.kt.request.exception.ApiException
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
@@ -21,22 +22,34 @@ import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
  *
  */
 class RxRequest<T, E> where E : BaseResponse<T> {
-    private var mCallback: ResultCallback<T>? = null
+
     private var mListener: RequestListener? = null
     private var mRxLife: RxLife? = null
 
     companion object {
         @JvmStatic
         fun <T, E : BaseResponse<T>> create(observable: Observable<E>): RxRequest<T, E> {
-            return RxRequest(observable)
+            return RxRequest(observable,null)
+        }
+
+        @JvmStatic
+        fun <T, E : BaseResponse<T>> createCustom(observable: Observable<T>): RxRequest<T, E> {
+            return RxRequest(null,observable)
         }
     }
 
-    private  val mObservable: Observable<E>
+    private  var mObservable: Observable<E>? = null
+    private  var mObservable2: Observable<T>? = null
 
-    private constructor(observable: Observable<E>) {
-        this.mObservable = observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+    private constructor(observable: Observable<E>?,observable2: Observable<T>?) {
+        if(observable2 == null){
+            this.mObservable = observable!!.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        }else{
+            this.mObservable2 = observable2.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        }
     }
+
+
 
     /**
      * 添加请求生命周期的监听
@@ -57,18 +70,21 @@ class RxRequest<T, E> where E : BaseResponse<T> {
     }
 
     fun request(callback: ResultCallback<T>): Disposable {
-        this.mCallback = callback
-        val disposable = mObservable.subscribe(object : Consumer<BaseResponse<T>> {
-            override fun accept(bean: BaseResponse<T>?) {
-                bean?:return
-                if (!isSuccess(bean.getCode())) {
-                    throw ApiException(bean.getCode(), bean.getMsg()?:"请求失败")
+        val disposable = mObservable!!.subscribe({ bean ->
+            when {
+                bean == null -> {
+                    callback.onFailed(-1, "返回为空")
                 }
-                mCallback?.onSuccess(bean.getCode(), bean.getData())
+                isSuccess(bean.getCode()).not() -> {
+                    callback.onFailed(bean.getCode(), bean.getMsg()?:"请求失败")
+                }
+                else -> {
+                    callback.onSuccess(bean.getCode(), bean.getData())
+                }
             }
-        }, Consumer<Throwable> { t ->
+        }, { t ->
             if (t is ApiException) {
-                mCallback?.onFailed(t.code,t.msg)
+                callback.onFailed(t.code,t.msg)
             } else {
                 mListener?.let {
                     var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
@@ -80,11 +96,53 @@ class RxRequest<T, E> where E : BaseResponse<T> {
 
             }
             mListener?.onFinish()
-        }, Action {
+        }, {
             mListener?.onFinish()
         },
-                Consumer<Disposable> {
-                    mListener?.onStart() })
+            {
+                mListener?.onStart() })
+        mRxLife?.add(disposable)
+        return disposable
+    }
+
+    fun customRequest(callback: ( (BaseResponse<T>) -> Unit)): Disposable {
+        val disposable = mObservable!!.subscribe({ bean ->
+            callback.invoke(bean)
+        }, { t ->
+            mListener?.let {
+                var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
+                if(handle == null){
+                    handle = ExceptionHandle(t)
+                }
+                mListener?.onError(handle)
+            }
+            mListener?.onFinish()
+        }, {
+            mListener?.onFinish()
+        },
+            {
+                mListener?.onStart() })
+        mRxLife?.add(disposable)
+        return disposable
+    }
+
+    fun customEntityRequest(callback: ( (T) -> Unit)): Disposable {
+        val disposable = mObservable2!!.subscribe({ bean ->
+            callback.invoke(bean)
+        }, { t ->
+            mListener?.let {
+                var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
+                if(handle == null){
+                    handle = ExceptionHandle(t)
+                }
+                mListener?.onError(handle)
+            }
+            mListener?.onFinish()
+        }, {
+            mListener?.onFinish()
+        },
+            {
+                mListener?.onStart() })
         mRxLife?.add(disposable)
         return disposable
     }
@@ -104,12 +162,18 @@ class RxRequest<T, E> where E : BaseResponse<T> {
         }
         return false
     }
+
+
 }
+
+
 
 interface ResultCallback<E> {
     fun onSuccess(code: Int, data: E?)
     fun onFailed(code: Int, msg: String?)
 }
+
+
 
 interface RequestListener {
     fun onStart()

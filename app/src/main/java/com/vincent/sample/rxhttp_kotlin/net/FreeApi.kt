@@ -19,6 +19,7 @@ object FreeApi: Api() {
     interface Code {
         companion object {
             const val SUCCESS = 0
+            const val DATE_SUCCESS = 1
         }
     }
 
@@ -58,7 +59,7 @@ object FreeApi: Api() {
          */
         @Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
         @GET("weatherApi")
-        fun singlePoetry(): Observable<ResponseBean<SinglePoetryBean>>
+        fun singlePoetry(): Observable<SinglePoetryBean>
 
         /**
          * http 请求 // www.mxnzp.com/api/holiday/single/20200102

@@ -26,12 +26,14 @@ class TestRequestActivity : AppCompatActivity() {
     }
     private val reqListener = object : RequestListener {
         private var timeStart: Long = 0
+        @SuppressLint("SetTextI18n")
         override fun onStart() {
             tv_log.text = ""
             tv_log.text = "onStart"
             timeStart = System.currentTimeMillis()
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onError(handle: ExceptionHandle?) {
             tv_log.text = "${tv_log.text}\nonError${handle?.msg}"
         }
@@ -123,8 +125,10 @@ class TestRequestActivity : AppCompatActivity() {
      */
     private fun getCelebrities() {
         try {
-            mRxLife.add(RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
+            mRxLife.add(
+                RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
                 .request(object : ResultCallback<List<Celebrity>> {
+                    @SuppressLint("SetTextI18n")
                     override fun onSuccess(code: Int, data: List<Celebrity>?) {
                         tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
                     }
@@ -145,8 +149,10 @@ class TestRequestActivity : AppCompatActivity() {
      * 获取轮播条广告
      */
     private fun getBanner() {
-        mRxLife.add(RxHttp.request(FreeApi.api().getBannerList()).listener(reqListener)
+        mRxLife.add(
+            RxHttp.request(FreeApi.api().getBannerList()).listener(reqListener)
             .request(object : ResultCallback<List<Banner>> {
+                @SuppressLint("SetTextI18n")
                 override fun onSuccess(code: Int, data: List<Banner>?) {
                     tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
                 }
@@ -164,7 +170,8 @@ class TestRequestActivity : AppCompatActivity() {
      */
     private fun register() {
         et_userName.text
-        mRxLife.add(RxHttp.request(
+        mRxLife.add(
+            RxHttp.request(
             FreeApi.api().register(
                 et_userName.text.toString(),
                 et_password.text.toString()
@@ -172,6 +179,7 @@ class TestRequestActivity : AppCompatActivity() {
             )
         ).listener(reqListener)
             .request(object : ResultCallback<RegisterBean> {
+                @SuppressLint("SetTextI18n")
                 override fun onSuccess(code: Int, data: RegisterBean?) {
                     tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
                 }
@@ -186,42 +194,38 @@ class TestRequestActivity : AppCompatActivity() {
 
     /**
      * 重定向
+     * 数据实体非标准实体 ，直接返回的是{@link RegisterBean}
      */
     private fun singlePoetry() {
-        mRxLife.add(RxHttp.request(FreeApi.api().singlePoetry()).listener(reqListener)
-            .request(object : ResultCallback<SinglePoetryBean> {
-                override fun onSuccess(code: Int, data: SinglePoetryBean?) {
-                    tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                }
 
-                @SuppressLint("SetTextI18n")
-                override fun onFailed(code: Int, msg: String?) {
-                    tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
-                }
-            })
-        )
+        mRxLife.add(RxHttp.customRequest(FreeApi.api().singlePoetry())
+            .listener(reqListener).customEntityRequest {
+                tv_log.text = "${tv_log.text}\nonSuccess {${Gson().toJson(it)}}}"
+        })
+
+
     }
 
     /**
      * 获取今日信息
+     * 由于SuccessCode 非标准Code,因此返回整个数据实体自定义
      */
     private fun getCurrentDate() {
-        mRxLife.add(RxHttp.request(FreeApi.api().getDate("www.mxnzp.com/api/holiday/single/${getCurrent()}")).listener(
-            reqListener
-        )
-            .request(object : ResultCallback<DateData> {
-                override fun onSuccess(code: Int, data: DateData?) {
-                    tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                }
-
-                @SuppressLint("SetTextI18n")
-                override fun onFailed(code: Int, msg: String?) {
-                    tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+        mRxLife.add(
+            RxHttp.request(FreeApi.api()
+            .getDate("www.mxnzp.com/api/holiday/single/${getCurrent()}"))
+            .listener(reqListener)
+            .customRequest {
+                // 访问成功
+                if(it.getCode() == 1){
+                    tv_log.text = "${tv_log.text}\nonSuccess {code-${it.getCode()} data-${Gson().toJson(it.getData())}}"
+                }else{
+                    tv_log.text = "${tv_log.text}\nonFailed {code-${it.getCode()} msg-${it.getMsg()}}"
                 }
             })
-        )
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun getCurrent(): String {
         return SimpleDateFormat("yyyy-MM-dd").format(Date())
     }

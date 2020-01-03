@@ -2,6 +2,7 @@ package per.goweii.rxhttp.kt.core
 
 import android.content.Context
 import io.reactivex.Observable
+import per.goweii.rxhttp.kt.R
 import per.goweii.rxhttp.kt.core.exception.RxHttpUninitializedException
 import per.goweii.rxhttp.kt.download.DownloadInfo
 import per.goweii.rxhttp.kt.download.RxDownload
@@ -14,7 +15,7 @@ import per.goweii.rxhttp.kt.request.exception.NullRequestSettingException
 
 object RxHttp {
 
-     lateinit var mAppContext: Context
+      var mAppContext: Context? = null
 
     private var mRequestSetting: RequestSetting? = null
     private var mDownloadSetting: DownloadSetting? = null
@@ -49,6 +50,10 @@ object RxHttp {
 
     fun <T, R : BaseResponse<T>> request(observable: Observable<R>): RxRequest<T, R> {
         return RxRequest.create(observable)
+    }
+
+    fun <T> customRequest(observable: Observable<T>): RxRequest<T,  BaseResponse<T>> {
+        return RxRequest.createCustom(observable)
     }
 
     fun download( info: DownloadInfo): RxDownload {

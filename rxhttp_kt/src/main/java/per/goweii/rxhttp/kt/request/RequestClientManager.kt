@@ -38,7 +38,7 @@ object RequestClientManager:BaseClientManager() {
                 .client(createOkHttpClient())
                 .baseUrl(checkBaseUrl(baseUrl))
         builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        var gson: Gson = RxHttp.getRequestSetting()?.getGson()?:Gson()
+        val gson = RxHttp.getRequestSetting()?.getGson()?:Gson()
         builder.addConverterFactory(GsonConverterFactory.create(gson))
         return builder.build()
     }
@@ -50,14 +50,13 @@ object RequestClientManager:BaseClientManager() {
      * @param <T>   Api接口
      * @return Api接口实例
     </T> */
-    fun <T> getService(clazz: Class<T>?): T {
+    fun <T> getService(clazz: Class<T>): T {
         return getRetrofit(clazz).create(clazz)
     }
 
     private fun getRetrofit(clazz: Class<*>?): Retrofit {
-        if (clazz == null) {
-            return mRetrofit
-        }
+
+        clazz?:return mRetrofit
         var retrofit: Retrofit? = null
         if (mRetrofitMap.isNotEmpty()) {
             val iterator = mRetrofitMap.entries.iterator()
@@ -73,7 +72,7 @@ object RequestClientManager:BaseClientManager() {
         if (retrofit != null) {
             return retrofit
         }
-        val baseUrlMap = RxHttp.getRequestSetting()!!.getServiceBaseUrl()
+        val baseUrlMap = RxHttp.getRequestSetting()?.getServiceBaseUrl()
         if (baseUrlMap.isNullOrEmpty().not()) {
             return mRetrofit
         }
@@ -100,7 +99,7 @@ object RequestClientManager:BaseClientManager() {
     private fun createOkHttpClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
         // 设置调试模式打印日志
-        if (RxHttp.getRequestSetting()!!.isDebug()) {
+        if (RxHttp.getRequestSetting()?.isDebug() == true) {
             val logging = HttpLoggingInterceptor()
             logging.level = HttpLoggingInterceptor.Level.BODY
             builder.addInterceptor(logging)
@@ -108,10 +107,10 @@ object RequestClientManager:BaseClientManager() {
         // 设置缓存
         builder.cache(createCache())
         // 设置3个超时时长
-        val timeout = RxHttp.getRequestSetting()!!.getTimeout()
-        val connectTimeout = RxHttp.getRequestSetting()!!.getConnectTimeout()
-        val readTimeout = RxHttp.getRequestSetting()!!.getReadTimeout()
-        val writeTimeout = RxHttp.getRequestSetting()!!.getWriteTimeout()
+        val timeout = RxHttp.getRequestSetting()?.getTimeout()?:1
+        val connectTimeout = RxHttp.getRequestSetting()?.getConnectTimeout()?:0
+        val readTimeout = RxHttp.getRequestSetting()?.getReadTimeout()?:0
+        val writeTimeout = RxHttp.getRequestSetting()?.getWriteTimeout()?:0
         builder.connectTimeout(if (connectTimeout > 0) connectTimeout else timeout, TimeUnit.MILLISECONDS)
         builder.readTimeout(if (readTimeout > 0) readTimeout else timeout, TimeUnit.MILLISECONDS)
         builder.writeTimeout(if (writeTimeout > 0) writeTimeout else timeout, TimeUnit.MILLISECONDS)

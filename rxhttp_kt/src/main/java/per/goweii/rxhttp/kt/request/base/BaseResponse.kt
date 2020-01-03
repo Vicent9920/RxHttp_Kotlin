@@ -20,4 +20,5 @@ interface BaseResponse<T>{
     fun getMsg(): String?
 
     fun setMsg(msg: String?)
+
 }

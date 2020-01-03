@@ -28,7 +28,9 @@ interface RequestSetting {
      *
      * @return Map 别名,BaseUrl
      */
-    fun getRedirectBaseUrl(): Map<String, String>?
+    fun getRedirectBaseUrl(): Map<String, String>
+
+
 
     /**
      * 用于对一组接口设置BaseUrl
@@ -37,7 +39,7 @@ interface RequestSetting {
      *
      * @return Map 接口类,BaseUrl
      */
-    fun getServiceBaseUrl(): Map<Class<*>, String>?
+    fun getServiceBaseUrl(): Map<Class<*>, String>
 
     fun getSuccessCode(): Int
 
@@ -47,28 +49,24 @@ interface RequestSetting {
     /**
      * 获取默认超时时长，单位为毫秒数
      */
-    @androidx.annotation.IntRange(from = 1)
     fun getTimeout(): Long
 
     /**
      * 获取Connect超时时长，单位为毫秒数
      * 返回0则取getTimeout
      */
-    @androidx.annotation.IntRange(from = 0)
     fun getConnectTimeout(): Long
 
     /**
      * 获取Read超时时长，单位为毫秒数
      * 返回0则取getTimeout
      */
-    @androidx.annotation.IntRange(from = 0)
     fun getReadTimeout(): Long
 
     /**
      * 获取Write超时时长，单位为毫秒数
      * 返回0则取getTimeout
      */
-    @androidx.annotation.IntRange(from = 0)
     fun getWriteTimeout(): Long
 
     /**
@@ -79,22 +77,21 @@ interface RequestSetting {
     /**
      * 获取网络缓存的最大值
      */
-    @androidx.annotation.IntRange(from = 1)
     fun getCacheSize(): Long
 
-    fun getStaticPublicQueryParameter(): Map<String, String>?
+    fun getStaticPublicQueryParameter(): Map<String, String>
 
 
-    fun getDynamicPublicQueryParameter(): Map<String, ParameterGetter>?
+    fun getDynamicPublicQueryParameter(): Map<String, ParameterGetter>
 
-    fun getStaticHeaderParameter(): Map<String, String>?
+    fun getStaticHeaderParameter(): Map<String, String>
 
-    fun getDynamicHeaderParameter(): Map<String, ParameterGetter>?
+    fun getDynamicHeaderParameter(): Map<String, ParameterGetter>
 
     fun <E : ExceptionHandle> getExceptionHandle(): E?
 
 
-    fun getInterceptors(): Array<Interceptor>?
+    fun getInterceptors(): Array<Interceptor>
 
 
     fun getNetworkInterceptors(): Array<Interceptor>

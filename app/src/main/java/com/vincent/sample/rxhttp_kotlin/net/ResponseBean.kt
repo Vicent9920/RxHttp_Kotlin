@@ -11,7 +11,7 @@ import per.goweii.rxhttp.kt.request.base.BaseResponse
  * <p>版本号：1<p>
  *
  */
-class ResponseBean<T>: BaseResponse<T> {
+open class ResponseBean<T>: BaseResponse<T> {
     @SerializedName(value = "code", alternate = ["status"])
     private var code = 0
     @SerializedName(value = "data", alternate = ["result"])
@@ -41,4 +41,6 @@ class ResponseBean<T>: BaseResponse<T> {
     override fun setMsg(msg: String?) {
         this.message = msg
     }
+
+
 }
