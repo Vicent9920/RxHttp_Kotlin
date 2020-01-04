@@ -6,9 +6,19 @@
 
 [Demo下载](https://github.com/Vicent9920/RxHttp_Kotlin/raw/master/app/release/app-release.apk)
 
+## 添加依赖 ##
+ 添加`jitpack`仓库依赖
+ 
+```
+maven { url 'https://jitpack.io' }
+```
+添加依赖
 
+```
+implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.0'
+```
 
-# 功能简介
+# 一、功能简介
 
 - 网络请求（`RxRequest`）
   - 支持监听请求声明周期，如开始结束和网络错误
@@ -29,7 +39,7 @@
 
 
 
-# 发起请求之`RxRequest`
+# 二、发起请求之`RxRequest`
 
 ## 使用说明
 
@@ -613,7 +623,7 @@ public class CustomAppGlideModule extends AppGlideModule {
 
 
 
-# 文件下载之`RxDownload`
+# 三、文件下载之`RxDownload`
 
 ## 使用方法
 
