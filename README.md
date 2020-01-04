@@ -29,6 +29,7 @@ implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.0'
   - 支持自定义异常处理和异常提示消息
   - 支持网络请求的任意实体（**原框架是不允许**）
   - 支持解析过程自定义（如`responseBody` \`SuccessCode` 等自定义处理）
+  - 支持Cookie管理
 - 文件下载（`RxDownload`）
   - 支持断点续传
   - 支持下载进度回调

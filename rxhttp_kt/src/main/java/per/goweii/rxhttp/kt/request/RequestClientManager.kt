@@ -7,6 +7,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.checkBaseUrl
+import per.goweii.rxhttp.kt.core.cookie.CookieJarImpl
+import per.goweii.rxhttp.kt.core.cookie.store.PersistentCookieStore
 import per.goweii.rxhttp.kt.core.getCacheDir
 import per.goweii.rxhttp.kt.core.manager.BaseClientManager
 import per.goweii.rxhttp.kt.request.interceptor.*
@@ -105,6 +107,7 @@ object RequestClientManager:BaseClientManager() {
             logging.level = HttpLoggingInterceptor.Level.BODY
             builder.addInterceptor(logging)
         }
+        builder.cookieJar(CookieJarImpl(PersistentCookieStore(RxHttp.mAppContext!!)))
         // 设置缓存
         builder.cache(createCache())
         // 设置3个超时时长
