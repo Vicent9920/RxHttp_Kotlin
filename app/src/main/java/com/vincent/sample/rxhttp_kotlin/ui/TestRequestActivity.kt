@@ -5,7 +5,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.vincent.sample.rxhttp_kotlin.R
-import com.vincent.sample.rxhttp_kotlin.entity.*
+import com.vincent.sample.rxhttp_kotlin.entity.Banner
+import com.vincent.sample.rxhttp_kotlin.entity.Celebrity
+import com.vincent.sample.rxhttp_kotlin.entity.RegisterBean
+import com.vincent.sample.rxhttp_kotlin.entity.UploadImgBean
 import com.vincent.sample.rxhttp_kotlin.net.FreeApi
 import kotlinx.android.synthetic.main.activity_test_request.*
 import okhttp3.OkHttpClient
@@ -16,8 +19,11 @@ import per.goweii.rxhttp.kt.request.ResultCallback
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 import per.goweii.rxhttp.kt.request.setting.DefaultRequestSetting
 import per.goweii.rxhttp.kt.request.setting.ParameterGetter
+import per.goweii.rxhttp.kt.request.utils.RequestBodyUtils.builder
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class TestRequestActivity : AppCompatActivity() {
 
@@ -124,13 +130,13 @@ class TestRequestActivity : AppCompatActivity() {
      * 获取公众号列表
      */
     private fun getCelebrities() {
-        try {
-            mRxLife.add(
-                RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
+        mRxLife.add(
+            RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
                 .request(object : ResultCallback<List<Celebrity>> {
                     @SuppressLint("SetTextI18n")
                     override fun onSuccess(code: Int, data: List<Celebrity>?) {
-                        tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
+                        tv_log.text =
+                            "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
                     }
 
                     @SuppressLint("SetTextI18n")
@@ -138,10 +144,7 @@ class TestRequestActivity : AppCompatActivity() {
                         tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
                     }
                 })
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        )
     }
 
 
@@ -151,17 +154,18 @@ class TestRequestActivity : AppCompatActivity() {
     private fun getBanner() {
         mRxLife.add(
             RxHttp.request(FreeApi.api().getBannerList()).listener(reqListener)
-            .request(object : ResultCallback<List<Banner>> {
-                @SuppressLint("SetTextI18n")
-                override fun onSuccess(code: Int, data: List<Banner>?) {
-                    tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                }
+                .request(object : ResultCallback<List<Banner>> {
+                    @SuppressLint("SetTextI18n")
+                    override fun onSuccess(code: Int, data: List<Banner>?) {
+                        tv_log.text =
+                            "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
+                    }
 
-                @SuppressLint("SetTextI18n")
-                override fun onFailed(code: Int, msg: String?) {
-                    tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
-                }
-            })
+                    @SuppressLint("SetTextI18n")
+                    override fun onFailed(code: Int, msg: String?) {
+                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+                    }
+                })
         )
     }
 
@@ -169,26 +173,26 @@ class TestRequestActivity : AppCompatActivity() {
      * 注册
      */
     private fun register() {
-        et_userName.text
         mRxLife.add(
             RxHttp.request(
-            FreeApi.api().register(
-                et_userName.text.toString(),
-                et_password.text.toString()
-                , et_password.text.toString()
-            )
-        ).listener(reqListener)
-            .request(object : ResultCallback<RegisterBean> {
-                @SuppressLint("SetTextI18n")
-                override fun onSuccess(code: Int, data: RegisterBean?) {
-                    tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                }
+                FreeApi.api().register(
+                    et_userName.text.toString(),
+                    et_password.text.toString()
+                    , et_password.text.toString()
+                )
+            ).listener(reqListener)
+                .request(object : ResultCallback<RegisterBean> {
+                    @SuppressLint("SetTextI18n")
+                    override fun onSuccess(code: Int, data: RegisterBean?) {
+                        tv_log.text =
+                            "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
+                    }
 
-                @SuppressLint("SetTextI18n")
-                override fun onFailed(code: Int, msg: String?) {
-                    tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
-                }
-            })
+                    @SuppressLint("SetTextI18n")
+                    override fun onFailed(code: Int, msg: String?) {
+                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+                    }
+                })
         )
     }
 
@@ -202,10 +206,9 @@ class TestRequestActivity : AppCompatActivity() {
         mRxLife.add(RxHttp.customRequest(FreeApi.api().singlePoetry())
             .listener(reqListener).customEntityRequest {
                 tv_log.text = "${tv_log.text}\nonSuccess {${Gson().toJson(it)}}}"
-        })
-
-
+            })
     }
+
 
     /**
      * 获取今日信息
@@ -214,17 +217,43 @@ class TestRequestActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun getCurrentDate() {
         mRxLife.add(
-            RxHttp.request(FreeApi.api()
-            .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}"))
-            .listener(reqListener)
-            .customRequest {
-                // 访问成功
-                if(it.getCode() == 1){
-                    tv_log.text = "${tv_log.text}\nonSuccess {code-${it.getCode()} data-${Gson().toJson(it.getData())}}"
-                }else{
-                    tv_log.text = "${tv_log.text}\nonFailed {code-${it.getCode()} msg-${it.getMsg()}}"
-                }
-            })
+            RxHttp.request(
+                FreeApi.api()
+                    .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}")
+            )
+                .listener(reqListener)
+                .customRequest {
+                    // 访问成功
+                    if (it.getCode() == 1) {
+                        tv_log.text =
+                            "${tv_log.text}\nonSuccess {code-${it.getCode()} data-${Gson().toJson(it.getData())}}"
+                    } else {
+                        tv_log.text =
+                            "${tv_log.text}\nonFailed {code-${it.getCode()} msg-${it.getMsg()}}"
+                    }
+                })
+    }
+
+    private fun uploadImg(content: String, imgFile: File) {
+        val map = builder()
+            .add<Any>("content", content)
+            .add<Any>("img", imgFile)
+            .build()
+        mRxLife.add(
+            RxHttp.request(FreeApi.api().uploadImg(map)).listener(reqListener)
+                .request(object : ResultCallback<UploadImgBean> {
+                    @SuppressLint("SetTextI18n")
+                    override fun onSuccess(code: Int, data: UploadImgBean?) {
+                        tv_log.text =
+                            "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
+                    }
+
+                    @SuppressLint("SetTextI18n")
+                    override fun onFailed(code: Int, msg: String?) {
+                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+                    }
+                })
+        )
     }
 
     @SuppressLint("SimpleDateFormat")

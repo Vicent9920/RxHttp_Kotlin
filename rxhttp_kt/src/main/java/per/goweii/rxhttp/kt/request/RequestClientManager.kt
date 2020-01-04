@@ -10,6 +10,7 @@ import per.goweii.rxhttp.kt.core.checkBaseUrl
 import per.goweii.rxhttp.kt.core.getCacheDir
 import per.goweii.rxhttp.kt.core.manager.BaseClientManager
 import per.goweii.rxhttp.kt.request.interceptor.*
+import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory

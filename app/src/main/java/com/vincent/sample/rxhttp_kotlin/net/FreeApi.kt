@@ -2,12 +2,13 @@ package com.vincent.sample.rxhttp_kotlin.net
 
 import com.vincent.sample.rxhttp_kotlin.entity.*
 import io.reactivex.Observable
+import okhttp3.RequestBody
 import per.goweii.rxhttp.kt.request.Api
-import per.goweii.rxhttp.kt.request.base.BaseBean
 import retrofit2.http.*
 
+
 /**
- * <p>文件描述：<p>
+ * <p>文件描述：接口常量配置<p>
  * <p>@author 烤鱼<p>
  * <p>@date 2020/1/1 0001 <p>
  * <p>@update 2020/1/1 0001<p>
@@ -19,7 +20,6 @@ object FreeApi: Api() {
     interface Code {
         companion object {
             const val SUCCESS = 0
-            const val DATE_SUCCESS = 1
         }
     }
 
@@ -68,6 +68,15 @@ object FreeApi: Api() {
          */
         @GET
         fun getDate(@Url path: String): Observable<ResponseBean<DateData>>
+
+        /**
+         * 键		值
+         * img		File
+         * content	String
+         */
+        @Multipart
+        @POST("public/img")
+        fun uploadImg(@PartMap img: Map<String, RequestBody>): Observable<ResponseBean<UploadImgBean>>
     }
 
     fun api(): Service {

@@ -8,8 +8,11 @@ import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
 import com.vincent.sample.rxhttp_kotlin.R
 import kotlinx.android.synthetic.main.activity_test_download.*
+import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.download.*
+import per.goweii.rxhttp.kt.download.setting.DefaultDownloadSetting
 import per.goweii.rxhttp.kt.download.utils.UnitFormatUtils
+
 
 class TestDownloadActivity : AppCompatActivity() {
     private val url =
@@ -22,7 +25,12 @@ class TestDownloadActivity : AppCompatActivity() {
         setContentView(R.layout.activity_test_download)
         progress_bar.max = 10000
         et_url.setText(url)
-
+        // 可不设置，使用DefaultDownloadSetting
+        RxHttp.initDownload(object : DefaultDownloadSetting() {
+            override fun getTimeout(): Long {
+                return 60000
+            }
+        })
         val downloadInfo = getDownloadInfo()
         mRxDownload = if (downloadInfo == null) {
             RxDownload.create(DownloadInfo(et_url.text.toString()))

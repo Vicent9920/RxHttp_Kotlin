@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import per.goweii.rxhttp.kt.request.base.BaseResponse
 
 /**
- * <p>文件描述：<p>
+ * <p>文件描述：网络请求返回实体<p>
  * <p>@author 烤鱼<p>
  * <p>@date 2020/1/1 0001 <p>
  * <p>@update 2020/1/1 0001<p>
