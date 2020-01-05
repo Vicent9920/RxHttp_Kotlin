@@ -13,8 +13,8 @@ import per.goweii.rxhttp.kt.core.cookie.store.CookieStore
  * <p>版本号：1<p>
  *
  */
-class CookieJarImpl(val cookieStore: CookieStore): CookieJar {
-    override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {
+class CookieJarImpl(private val cookieStore: CookieStore): CookieJar {
+    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         cookieStore.saveCookie(url, cookies)
     }
 

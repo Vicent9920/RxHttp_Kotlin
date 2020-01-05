@@ -49,9 +49,9 @@ class PersistentCookieStore:CookieStore {
         }
     }
 
-    override fun saveCookie(url: HttpUrl, urlCookies: MutableList<Cookie>) {
-        if (!cookies.containsKey(url.host())) {
-            cookies[url.host()] = ConcurrentHashMap()
+    override fun saveCookie(url: HttpUrl, urlCookies: List<Cookie>) {
+        if (!cookies.containsKey(url.host)) {
+            cookies[url.host] = ConcurrentHashMap()
         }
         for (cookie in urlCookies) { //当前cookie是否过期
             if (isCookieExpired(cookie)) {
@@ -63,8 +63,8 @@ class PersistentCookieStore:CookieStore {
     }
 
     override fun saveCookie(url: HttpUrl, cookie: Cookie) {
-        if (!cookies.containsKey(url.host())) {
-            cookies[url.host()] = ConcurrentHashMap()
+        if (!cookies.containsKey(url.host)) {
+            cookies[url.host] = ConcurrentHashMap()
         }
         //当前cookie是否过期
         if (isCookieExpired(cookie)) {
@@ -76,8 +76,8 @@ class PersistentCookieStore:CookieStore {
 
     override fun loadCookie(url: HttpUrl): List<Cookie> {
         val ret = ArrayList<Cookie>()
-        if (cookies.containsKey(url.host())) {
-            val urlCookies: Collection<Cookie> = cookies[url.host()]!!.values
+        if (cookies.containsKey(url.host)) {
+            val urlCookies: Collection<Cookie> = cookies[url.host]!!.values
             for (cookie in urlCookies) {
                 if (isCookieExpired(cookie)) {
                     removeCookie(url, cookie)
@@ -97,21 +97,21 @@ class PersistentCookieStore:CookieStore {
 
     override fun getCookie(url: HttpUrl): List<Cookie> {
         val ret: MutableList<Cookie> = ArrayList()
-        val mapCookie: Map<String, Cookie>? = cookies[url.host()]
+        val mapCookie: Map<String, Cookie>? = cookies[url.host]
         if (mapCookie != null) ret.addAll(mapCookie.values)
         return ret
     }
 
     override fun removeCookie(url: HttpUrl, cookie: Cookie): Boolean {
         val name = getCookieToken(cookie)
-        return if (cookies.containsKey(url.host()) && cookies[url.host()]!!.containsKey(name)) { //内存移除
-            cookies[url.host()]!!.remove(name)
+        return if (cookies.containsKey(url.host) && cookies[url.host]!!.containsKey(name)) { //内存移除
+            cookies[url.host]!!.remove(name)
             //文件移除
             val prefsWriter = cookiePrefs.edit()
             if (cookiePrefs.contains(COOKIE_NAME_PREFIX + name)) {
                 prefsWriter.remove(COOKIE_NAME_PREFIX + name)
             }
-            prefsWriter.putString(url.host(), TextUtils.join(",", cookies[url.host()]!!.keys))
+            prefsWriter.putString(url.host, TextUtils.join(",", cookies[url.host]!!.keys))
             prefsWriter.apply()
             true
         } else {
@@ -120,17 +120,17 @@ class PersistentCookieStore:CookieStore {
     }
 
     override fun removeCookie(url: HttpUrl): Boolean {
-        return if (cookies.containsKey(url.host())) { //文件移除
-            val cookieNames: Set<String> = cookies[url.host()]!!.keys
+        return if (cookies.containsKey(url.host)) { //文件移除
+            val cookieNames: Set<String> = cookies[url.host]!!.keys
             val prefsWriter = cookiePrefs.edit()
             for (cookieName in cookieNames) {
                 if (cookiePrefs.contains(COOKIE_NAME_PREFIX + cookieName)) {
                     prefsWriter.remove(COOKIE_NAME_PREFIX + cookieName)
                 }
             }
-            prefsWriter.remove(url.host()).apply()
+            prefsWriter.remove(url.host).apply()
             //内存移除
-            cookies.remove(url.host())
+            cookies.remove(url.host)
             true
         } else {
             false
@@ -177,10 +177,10 @@ class PersistentCookieStore:CookieStore {
         cookie: Cookie,
         name: String
     ) { //内存缓存
-        cookies[url.host()]!![name] = cookie
+        cookies[url.host]!![name] = cookie
         //文件缓存
         val prefsWriter = cookiePrefs.edit()
-        prefsWriter.putString(url.host(), TextUtils.join(",", cookies[url.host()]!!.keys))
+        prefsWriter.putString(url.host, TextUtils.join(",", cookies[url.host]!!.keys))
         prefsWriter.putString(COOKIE_NAME_PREFIX + name,
             encodeCookie(SerializableHttpCookie(cookie))
         )
@@ -188,7 +188,7 @@ class PersistentCookieStore:CookieStore {
     }
 
     private fun getCookieToken(cookie: Cookie): String {
-        return cookie.name() + "@" + cookie.domain()
+        return cookie.name + "@" + cookie.domain
     }
 
     /**
@@ -252,7 +252,7 @@ class PersistentCookieStore:CookieStore {
         /** 当前cookie是否过期  */
         @JvmStatic
         private fun isCookieExpired(cookie: Cookie): Boolean {
-            return cookie.expiresAt() < System.currentTimeMillis()
+            return cookie.expiresAt < System.currentTimeMillis()
         }
     }
 }

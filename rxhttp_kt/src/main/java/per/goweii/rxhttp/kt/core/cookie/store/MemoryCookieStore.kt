@@ -16,13 +16,13 @@ import kotlin.collections.HashMap
 class MemoryCookieStore: CookieStore {
     private  val memoryCookies: HashMap<String, MutableList<Cookie>> = HashMap()
     @Synchronized
-    override fun saveCookie(url: HttpUrl, cookie: MutableList<Cookie>) {
-        val oldCookies = memoryCookies[url.host()]
+    override fun saveCookie(url: HttpUrl, cookie: List<Cookie>) {
+        val oldCookies = memoryCookies[url.host]
         oldCookies?:return
         val needRemove: MutableList<Cookie> = ArrayList()
         for (newCookie in cookie) {
             for (oldCookie in oldCookies) {
-                if (newCookie.name() == oldCookie.name()) {
+                if (newCookie.name == oldCookie.name) {
                     needRemove.add(oldCookie)
                 }
             }
@@ -33,11 +33,11 @@ class MemoryCookieStore: CookieStore {
 
     @Synchronized
     override fun saveCookie(url: HttpUrl, cookie: Cookie) {
-        val cookies = memoryCookies[url.host()]
+        val cookies = memoryCookies[url.host]
         val needRemove: MutableList<Cookie> = ArrayList()
         cookies?:return
         for (item in cookies) {
-            if (cookie.name() == item.name()) {
+            if (cookie.name == item.name) {
                 needRemove.add(item)
             }
         }
@@ -47,10 +47,10 @@ class MemoryCookieStore: CookieStore {
 
     @Synchronized
     override fun loadCookie(url: HttpUrl): List<Cookie> {
-        var cookies = memoryCookies[url.host()]
+        var cookies = memoryCookies[url.host]
         if(cookies == null){
             cookies = ArrayList()
-            memoryCookies[url.host()] = cookies
+            memoryCookies[url.host] = cookies
         }
         return cookies
     }
@@ -70,20 +70,20 @@ class MemoryCookieStore: CookieStore {
     @Synchronized
     override fun getCookie(url: HttpUrl): List<Cookie> {
         val cookies: MutableList<Cookie> = ArrayList()
-        val urlCookies: List<Cookie>? = memoryCookies[url.host()]
+        val urlCookies: List<Cookie>? = memoryCookies[url.host]
         if (urlCookies != null) cookies.addAll(urlCookies)
         return cookies
     }
 
     @Synchronized
     override fun removeCookie(url: HttpUrl, cookie: Cookie): Boolean {
-        val cookies = memoryCookies[url.host()]
+        val cookies = memoryCookies[url.host]
         return cookies?.remove(cookie) == true
     }
 
     @Synchronized
     override fun removeCookie(url: HttpUrl): Boolean {
-        return memoryCookies.remove(url.host()) != null
+        return memoryCookies.remove(url.host) != null
     }
 
     @Synchronized

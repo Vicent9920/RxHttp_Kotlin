@@ -13,7 +13,7 @@ import okhttp3.HttpUrl
  */
 interface CookieStore {
     /** 保存url对应所有cookie  */
-    fun saveCookie(url: HttpUrl, cookie: MutableList<Cookie>)
+    fun saveCookie(url: HttpUrl, cookie: List<Cookie>)
 
     /** 保存url对应所有cookie  */
     fun saveCookie(url: HttpUrl, cookie: Cookie)
