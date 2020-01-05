@@ -2,12 +2,14 @@
 
 对RxJava2+Retrofit2+OkHttp3的封装，优雅实现接口请求和文件下载（根据Java版本修改）
 
-[GitHub主页](https://github.com/Vicent9920/RxHttp_Kotlin)
+[GitHub主页](https://github.com/Vicent9920)
 
 [Demo下载](https://github.com/Vicent9920/RxHttp_Kotlin/raw/master/app/release/app-release.apk)
 
 [Java版本](https://github.com/goweii/RxHttp)
+
 ## 添加依赖 ##
+
  添加`jitpack`仓库依赖
  
 ```
