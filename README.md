@@ -52,7 +52,7 @@ implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.1'
 1. 在`Application`或者引导页初始化
 
 ```
-RxHttp.init(this);
+RxHttp.mAppContext = applicationContext
 ```
 
 2. 初始化网络请求配置类继承`RequestSetting`或`DefaultRequestSetting`，并复写部分方法。
