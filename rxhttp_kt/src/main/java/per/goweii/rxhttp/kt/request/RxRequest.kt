@@ -3,14 +3,10 @@ package per.goweii.rxhttp.kt.request
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Action
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
-import per.goweii.rxhttp.kt.request.base.BaseBean
 import per.goweii.rxhttp.kt.request.base.BaseResponse
-import per.goweii.rxhttp.kt.request.exception.ApiException
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 
 /**
@@ -83,9 +79,7 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 }
             }
         }, { t ->
-            if (t is ApiException) {
-                callback.onFailed(t.code,t.msg)
-            } else {
+
                 mListener?.let {
                     var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
                     if(handle == null){
@@ -94,7 +88,7 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     mListener?.onError(handle)
                 }
 
-            }
+            callback.onFailed(-2, "其它异常:${t.message}")
             mListener?.onFinish()
         }, {
             mListener?.onFinish()

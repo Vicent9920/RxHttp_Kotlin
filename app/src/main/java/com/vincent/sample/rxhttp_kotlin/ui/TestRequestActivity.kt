@@ -2,6 +2,7 @@ package com.vincent.sample.rxhttp_kotlin.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.vincent.sample.rxhttp_kotlin.R
@@ -23,6 +24,8 @@ import per.goweii.rxhttp.kt.request.utils.RequestBodyUtils.builder
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
 
 
 class TestRequestActivity : AppCompatActivity() {
@@ -99,10 +102,7 @@ class TestRequestActivity : AppCompatActivity() {
             }
 
             override fun setOkHttpClient(builder: OkHttpClient.Builder) {
-                builder.hostnameVerifier { hostname, session ->
-                    // 验证主机名是否与服务器的身份验证方案匹配。
-                    true
-                }
+                builder.hostnameVerifier(HostnameVerifier { hostname, session -> true })
 //                super.setOkHttpClient(builder)
             }
         })
@@ -142,6 +142,7 @@ class TestRequestActivity : AppCompatActivity() {
                     @SuppressLint("SetTextI18n")
                     override fun onFailed(code: Int, msg: String?) {
                         tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+                        Toast.makeText(this@TestRequestActivity,"看看源码的接口地址注释就明白了",Toast.LENGTH_SHORT).show()
                     }
                 })
         )

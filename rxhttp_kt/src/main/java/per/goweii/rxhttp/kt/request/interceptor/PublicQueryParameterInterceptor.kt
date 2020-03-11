@@ -30,9 +30,9 @@ class PublicQueryParameterInterceptor private constructor(): Interceptor {
 
 
     @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response? {
+    override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
-        val builder = original.url().newBuilder()
+        val builder = original.url.newBuilder()
         val staticParameters: Map<String, String>? = RxHttp.getRequestSetting()?.getStaticPublicQueryParameter()
         if (NonNullUtils.check(staticParameters)) {
             for ((key, value) in staticParameters!!) {
@@ -46,7 +46,7 @@ class PublicQueryParameterInterceptor private constructor(): Interceptor {
             }
         }
         val request = original.newBuilder()
-                .method(original.method(), original.body())
+                .method(original.method, original.body)
                 .url(builder.build())
                 .build()
         return chain.proceed(request)

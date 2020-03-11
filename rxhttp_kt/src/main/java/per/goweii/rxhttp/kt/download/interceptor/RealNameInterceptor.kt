@@ -35,7 +35,7 @@ class RealNameInterceptor: Interceptor {
                 name = name.replace("UTF-8", "")
                 name = name.replace("\"", "")
                 if (!TextUtils.isEmpty(name)) {
-                    val responseBody = DownloadResponseBody(response.body()!!)
+                    val responseBody = DownloadResponseBody(response.body!!)
                     responseBody.realName = name
                     return response.newBuilder()
                             .body(responseBody)

@@ -16,7 +16,7 @@ open class ResponseBean<T>: BaseResponse<T> {
     private var code = 0
     @SerializedName(value = "data", alternate = ["result"])
     private var data: T? = null
-    @SerializedName(value = "msg", alternate = ["message"])
+    @SerializedName(value = "errorMsg", alternate = ["message"])
     private var message: String? = null
     override fun getCode(): Int {
         return this.code

@@ -2,6 +2,7 @@ package per.goweii.rxhttp.kt.request.utils
 
 import android.net.Uri
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import java.io.File
 import java.util.*
@@ -38,7 +39,7 @@ object RequestBodyUtils {
             if (value == null) {
                 return this
             }
-            val body = RequestBody.create(MediaType.parse("text/plain"), value)
+            val body = RequestBody.create("text/plain".toMediaTypeOrNull(), value)
             mParams[key] = body
             return this
         }
@@ -87,7 +88,7 @@ object RequestBodyUtils {
         }
 
         private fun getParamsValue( file: File): RequestBody {
-            return RequestBody.create(MediaType.parse(FileUtils.getMimeType(file)), file)
+            return RequestBody.create(FileUtils.getMimeType(file)!!.toMediaTypeOrNull(), file)
         }
 
         init {

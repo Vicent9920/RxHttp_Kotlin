@@ -36,7 +36,8 @@ object FreeApi: Api() {
          * 微信公众号列表
          */
         @Headers(Header.CACHE_ALIVE_SECOND + ":" + 10)
-        @GET("wxarticle/chapters/json")
+        // 正确地址 wxarticle/chapters/json 下面测试异常，因此不予修改
+        @GET("wxarticlelele/chapters/json")
         fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
 
         /**

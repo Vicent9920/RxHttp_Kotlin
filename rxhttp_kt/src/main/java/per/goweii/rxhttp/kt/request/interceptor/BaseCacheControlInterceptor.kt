@@ -19,7 +19,7 @@ import per.goweii.rxhttp.kt.request.utils.NonNullUtils
 open class BaseCacheControlInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        if (!TextUtils.equals(request.method(), "GET")) {
+        if (!TextUtils.equals(request.method, "GET")) {
             return chain.proceed(request)
         }
         val headers = request.headers(Api.Header.CACHE_ALIVE_SECOND)

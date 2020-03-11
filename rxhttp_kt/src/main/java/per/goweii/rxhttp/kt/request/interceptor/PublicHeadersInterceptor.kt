@@ -29,7 +29,7 @@ class PublicHeadersInterceptor: Interceptor {
     }
 
     @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response? {
+    override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val builder = request.newBuilder()
         val staticParameters: Map<String, String>? = RxHttp.getRequestSetting()?.getStaticHeaderParameter()

@@ -2,6 +2,7 @@ package per.goweii.rxhttp.kt.request.interceptor
 
 import android.text.TextUtils
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -34,7 +35,7 @@ class BaseUrlRedirectInterceptor private constructor(): Interceptor {
 
 
     @Throws(IOException::class)
-    override fun intercept(chain: Interceptor.Chain): Response? {
+    override fun intercept(chain: Interceptor.Chain): Response {
         val original = chain.request()
         val urls: Map<String, String>? = RxHttp.getRequestSetting()?.getRedirectBaseUrl()
         if (!NonNullUtils.check(urls)) {
@@ -48,27 +49,28 @@ class BaseUrlRedirectInterceptor private constructor(): Interceptor {
         builder.removeHeader(Api.Header.BASE_URL_REDIRECT)
         val urlName = urlNames[0]
         val newUrl = urls!![urlName] ?: return chain.proceed(original)
-        val newHttpUrl = HttpUrl.parse(checkBaseUrl(newUrl))
+
+        val newHttpUrl = newUrl.toHttpUrlOrNull()
                 ?: return chain.proceed(original)
-        val oldHttpUrl = original.url()
-        val pathSegments: MutableList<String> = ArrayList(oldHttpUrl.pathSegments())
+        val oldHttpUrl = original.url
+        val pathSegments: MutableList<String> = ArrayList(oldHttpUrl.pathSegments)
         val oldCount = defaultBaseUrlPathSegmentCount()
         for (i in 0 until oldCount) {
             pathSegments.removeAt(0)
         }
         val newHttpUrlBuilder = oldHttpUrl.newBuilder()
-                .scheme(newHttpUrl.scheme())
-                .host(newHttpUrl.host())
-                .port(newHttpUrl.port())
-        val size1 = newHttpUrl.pathSegments().size
+                .scheme(newHttpUrl.scheme)
+                .host(newHttpUrl.host)
+                .port(newHttpUrl.port)
+        val size1 = newHttpUrl.pathSegments.size
         for (i in size1 - 1 downTo 0) {
-            val segment = newHttpUrl.pathSegments()[i]
+            val segment = newHttpUrl.pathSegments[i]
             if (TextUtils.isEmpty(segment)) {
                 continue
             }
             pathSegments.add(0, segment)
         }
-        val size2 = oldHttpUrl.pathSegments().size
+        val size2 = oldHttpUrl.pathSegments.size
         for (i in 0 until size2) {
             newHttpUrlBuilder.removePathSegment(0)
         }
@@ -80,9 +82,9 @@ class BaseUrlRedirectInterceptor private constructor(): Interceptor {
     }
 
     private fun defaultBaseUrlPathSegmentCount(): Int {
-        val oldHttpUrl = HttpUrl.parse(checkBaseUrl(RxHttp.getRequestSetting()?.getBaseUrl()!!))
+        val oldHttpUrl = checkBaseUrl(RxHttp.getRequestSetting()?.getBaseUrl()!!).toHttpUrlOrNull()
                 ?: return 0
-        val oldSegments = oldHttpUrl.pathSegments()
+        val oldSegments = oldHttpUrl.pathSegments
         if (oldSegments.isNullOrEmpty()) {
             return 0
         }

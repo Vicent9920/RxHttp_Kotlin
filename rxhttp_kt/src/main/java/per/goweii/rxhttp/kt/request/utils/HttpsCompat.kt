@@ -51,16 +51,22 @@ import javax.net.ssl.*
  *
  */
 object HttpsCompat {
-    fun ignoreSSLForOkHttp(builder: OkHttpClient.Builder) {
-        builder.hostnameVerifier(getIgnoreHostnameVerifier())
-                .sslSocketFactory(getIgnoreSSLSocketFactory())
+
+    fun ignoreSSLForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager) {
+        if(getIgnoreHostnameVerifier() != null && getIgnoreSSLSocketFactory() != null){
+            if(getIgnoreHostnameVerifier() != null && getIgnoreSSLSocketFactory() != null){
+
+                builder.hostnameVerifier(getIgnoreHostnameVerifier()!!)
+                    .sslSocketFactory(getIgnoreSSLSocketFactory()!!,manager)
+            }
+        }
     }
 
-    fun enableTls12ForOkHttp(builder: OkHttpClient.Builder) {
+    fun enableTls12ForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             val ssl = getEnableTls12SSLSocketFactory()
             if (ssl != null) {
-                builder.sslSocketFactory(ssl)
+                 builder.sslSocketFactory(ssl,manager)
             }
         }
     }

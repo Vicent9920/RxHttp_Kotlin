@@ -13,7 +13,7 @@ import java.io.IOException
  * <p>版本号：1<p>
  *
  */
-class DownloadResponseBody(val responseBody:ResponseBody): ResponseBody() {
+class DownloadResponseBody(private val responseBody:ResponseBody): ResponseBody() {
     private var source: BufferedSource? = null
      var realName: String? = null
     override fun contentLength(): Long {
@@ -26,7 +26,7 @@ class DownloadResponseBody(val responseBody:ResponseBody): ResponseBody() {
 
     override fun source(): BufferedSource {
         if (source == null) {
-            source = Okio.buffer(source(responseBody.source()))
+            source = responseBody.source()
         }
         return source!!
     }
