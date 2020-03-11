@@ -367,46 +367,46 @@ private fun uploadImg(content: String, imgFile: File) {
 
 主要提供7个静态方法，用于实现证书忽略和开启`Android4.4`及以下对`TLS1.2`的支持。
 
-```java
+```
 /**
  * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
  */
-public static void ignoreSSLForOkHttp(OkHttpClient.Builder builder)
+fun ignoreSSLForOkHttp(OkHttpClient.Builder,X509TrustManager) 
     
 /**
  * 开启HttpsURLConnection对TLS1.2的支持
  */
-public static void enableTls12ForOkHttp(OkHttpClient.Builder builder)
+fun enableTls12ForOkHttp( OkHttpClient.Builder,X509TrustManager)
     
 /**
  * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
  * 应在使用HttpsURLConnection之前调用，建议在application中
  */
-public static void ignoreSSLForHttpsURLConnection()
+fun ignoreSSLForHttpsURLConnection() 
     
 /**
  * 开启HttpsURLConnection对TLS1.2的支持
  * 应在使用HttpsURLConnection之前调用，建议在application中
  */
-public static void enableTls12ForHttpsURLConnection()
+fun enableTls12ForHttpsURLConnection()
     
 /**
  * 获取开启TLS1.2的SSLSocketFactory
  * 建议在android4.4及以下版本调用
  */
-public static SSLSocketFactory getEnableTls12SSLSocketFactory()
+fun getEnableTls12SSLSocketFactory(): SSLSocketFactory?
     
 /**
  * 获取忽略证书的HostnameVerifier
  * 与{@link #getIgnoreSSLSocketFactory()}同时配置使用
  */
-public static HostnameVerifier getIgnoreHostnameVerifier()
+fun getIgnoreHostnameVerifier(): HostnameVerifier?
     
 /**
  * 获取忽略证书的SSLSocketFactory
  * 与{@link #getIgnoreHostnameVerifier()}同时配置使用
  */
-public static SSLSocketFactory getIgnoreSSLSocketFactory()
+fun getIgnoreSSLSocketFactory(): SSLSocketFactory? 
 ```
 
 

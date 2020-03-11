@@ -51,31 +51,58 @@ import javax.net.ssl.*
  *
  */
 object HttpsCompat {
-
-    fun ignoreSSLForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager) {
+    /**
+     * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
+     */
+    fun ignoreSSLForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager? = null) {
         if(getIgnoreHostnameVerifier() != null && getIgnoreSSLSocketFactory() != null){
             if(getIgnoreHostnameVerifier() != null && getIgnoreSSLSocketFactory() != null){
 
                 builder.hostnameVerifier(getIgnoreHostnameVerifier()!!)
-                    .sslSocketFactory(getIgnoreSSLSocketFactory()!!,manager)
+                    .sslSocketFactory(getIgnoreSSLSocketFactory()!!, manager
+                        ?: object : X509TrustManager {
+                            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                                return arrayOf()
+                            }
+                        })
             }
         }
     }
 
-    fun enableTls12ForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager) {
+    /**
+     * 开启HttpsURLConnection对TLS1.2的支持
+     */
+    fun enableTls12ForOkHttp(builder: OkHttpClient.Builder,manager:X509TrustManager? = null) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             val ssl = getEnableTls12SSLSocketFactory()
             if (ssl != null) {
-                 builder.sslSocketFactory(ssl,manager)
+                 builder.sslSocketFactory(ssl,manager
+                     ?: object : X509TrustManager {
+                         override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                         override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                         override fun getAcceptedIssuers(): Array<X509Certificate> {
+                             return arrayOf()
+                         }
+                     })
             }
         }
     }
 
+    /**
+     * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
+     * 应在使用HttpsURLConnection之前调用，建议在application中
+     */
     fun ignoreSSLForHttpsURLConnection() {
         HttpsURLConnection.setDefaultHostnameVerifier(getIgnoreHostnameVerifier())
         HttpsURLConnection.setDefaultSSLSocketFactory(getIgnoreSSLSocketFactory())
     }
 
+    /**
+     * 开启HttpsURLConnection对TLS1.2的支持
+     * 应在使用HttpsURLConnection之前调用，建议在application中
+     */
     fun enableTls12ForHttpsURLConnection() {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             val ssl = getEnableTls12SSLSocketFactory()
@@ -122,7 +149,7 @@ object HttpsCompat {
         }
     }
 
-    private fun getTrustManager(): Array<TrustManager>? {
+    private fun getTrustManager(): Array<TrustManager> {
         return arrayOf(
                 object : X509TrustManager {
                     override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
