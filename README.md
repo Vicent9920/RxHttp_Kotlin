@@ -18,7 +18,7 @@ maven { url 'https://jitpack.io' }
 添加依赖
 
 ```
-implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.1'
+implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.2'
 ```
 
 # 一、功能简介
