@@ -8,6 +8,7 @@ import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
 import per.goweii.rxhttp.kt.request.base.BaseResponse
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
+import retrofit2.HttpException
 
 /**
  * <p>文件描述：网络请求<p>
@@ -87,8 +88,13 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     }
                     mListener?.onError(handle)
                 }
-
-            callback.onFailed(-2, "其它异常:${t.message}")
+            if(t is HttpException){
+                if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false){
+                    callback.onFailed(t.code(), "${t.message}")
+                }
+            }else{
+                callback.onFailed(-2, "其它异常:${t.message}")
+            }
             mListener?.onFinish()
         }, {
             mListener?.onFinish()

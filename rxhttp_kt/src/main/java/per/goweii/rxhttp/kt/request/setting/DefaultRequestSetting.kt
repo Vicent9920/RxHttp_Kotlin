@@ -24,7 +24,11 @@ abstract class DefaultRequestSetting : RequestSetting{
         return HashMap()
     }
 
-
+    override fun getMultiHttpCode(): (code: Int) -> Boolean {
+        return {
+            false
+        }
+    }
     override fun getMultiSuccessCode(): IntArray {
         return intArrayOf()
     }

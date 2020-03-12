@@ -20,6 +20,7 @@ class PublicHeadersInterceptor: Interceptor {
     companion object{
         @JvmStatic
         fun addTo( builder: OkHttpClient.Builder) {
+
             val staticParameters: Map<String, String>? = RxHttp.getRequestSetting()?.getStaticHeaderParameter()
             val dynamicParameters: Map<String, ParameterGetter>? = RxHttp.getRequestSetting()?.getDynamicHeaderParameter()
             if (NonNullUtils.check(staticParameters, dynamicParameters)) {
@@ -32,6 +33,7 @@ class PublicHeadersInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val builder = request.newBuilder()
+
         val staticParameters: Map<String, String>? = RxHttp.getRequestSetting()?.getStaticHeaderParameter()
         if (NonNullUtils.check(staticParameters)) {
             for ((key, value) in staticParameters!!) {

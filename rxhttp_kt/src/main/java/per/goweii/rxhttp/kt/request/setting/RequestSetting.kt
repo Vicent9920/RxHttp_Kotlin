@@ -1,6 +1,7 @@
 package per.goweii.rxhttp.kt.request.setting
 
 import com.google.gson.Gson
+import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
@@ -42,7 +43,8 @@ interface RequestSetting {
     fun getServiceBaseUrl(): Map<Class<*>, String>
 
     fun getSuccessCode(): Int
-
+    /** 参数错误、token失效等错误码 **/
+    fun getMultiHttpCode(): ((code:Int) -> Boolean)
 
     fun getMultiSuccessCode(): IntArray
 
@@ -125,3 +127,4 @@ interface RequestSetting {
      */
     fun isDebug(): Boolean
 }
+

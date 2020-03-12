@@ -63,6 +63,25 @@ class TestRequestActivity : AppCompatActivity() {
                 return FreeApi.Config.BASE_URL
             }
 
+            /**
+             * 根据后端返回的错误进行处理，
+             * 未处理的返回false，标准模式下会进入请求失败的回调
+             * 返回true 意味着消费当前事件，不会进入请求成功或者失败的回调
+             */
+            override fun getMultiHttpCode(): (code: Int) -> Boolean {
+                return {
+                    when(it){
+                        404 -> {
+                            true
+                        }
+                        500 -> {
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }
+
             // Code 判断
             override fun getSuccessCode(): Int {
                 return FreeApi.Code.SUCCESS
