@@ -69,6 +69,26 @@ RxHttp.initRequest(object : DefaultRequestSetting() {
                 return FreeApi.Code.SUCCESS
             }
 
+             /**
+             * 根据后端返回的错误进行处理
+             * （标准模式下有效，因为自定义实体请求无失败回调，但是可以通过网络生命周期的异常回调来处理）
+             * 未处理的返回false，会进入请求失败的回调
+             * 返回true 意味着消费当前事件，不会进入请求成功或者失败的回调
+             */
+            override fun getMultiHttpCode(): (code: Int) -> Boolean {
+                return {
+                    when(it){
+                        404 -> {
+                            true
+                        }
+                        500 -> {
+                            true
+                        }
+                        else -> false
+                    }
+                }
+            }
+
             // 重定向地址设置
             override fun getRedirectBaseUrl(): Map<String, String> {
                 val urls: MutableMap<String, String> =
