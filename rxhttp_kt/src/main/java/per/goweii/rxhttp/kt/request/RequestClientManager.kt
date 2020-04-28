@@ -32,13 +32,16 @@ object RequestClientManager:BaseClientManager() {
 
     private val mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
+    private val mOkHttpClient by lazy {
+        createOkHttpClient()
+    }
     override fun create(): Retrofit {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
 
     private fun create(baseUrl:String):Retrofit{
         val builder: Retrofit.Builder = Retrofit.Builder()
-                .client(createOkHttpClient())
+                .client(mOkHttpClient)
                 .baseUrl(checkBaseUrl(baseUrl))
         builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         val gson = RxHttp.getRequestSetting()?.getGson()?:Gson()
@@ -105,7 +108,8 @@ object RequestClientManager:BaseClientManager() {
         if (RxHttp.getRequestSetting()?.isDebug() == true) {
             val logging = HttpLoggingInterceptor()
             logging.level = HttpLoggingInterceptor.Level.BODY
-            builder.addInterceptor(logging)
+//            builder.addInterceptor(logging)
+            builder.addNetworkInterceptor(logging)
         }
         builder.cookieJar(CookieJarImpl(PersistentCookieStore(RxHttp.mAppContext!!)))
         // 设置缓存
@@ -152,5 +156,30 @@ object RequestClientManager:BaseClientManager() {
             cacheFile.mkdirs()
         }
         return Cache(cacheFile, RxHttp.getRequestSetting()?.getCacheSize()?:0L)
+    }
+
+    /**
+     * 取消请求
+     */
+    fun cancelAll(tag:Any?){
+
+        mOkHttpClient.dispatcher.queuedCalls().forEach {
+            if(tag!=null){
+                if(it.request().tag() == tag){
+                    it.cancel()
+                }
+            }else{
+                it.cancel()
+            }
+        }
+        mOkHttpClient.dispatcher.runningCalls().forEach {
+            if(tag!=null){
+                if(it.request().tag() == tag){
+                    it.cancel()
+                }
+            }else{
+                it.cancel()
+            }
+        }
     }
 }
