@@ -30,14 +30,17 @@ import java.util.concurrent.TimeUnit
 object RequestClientManager:BaseClientManager() {
 
 
-     var mRetrofit: Retrofit = create()
+      var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
-    private val mOkHttpClient = createOkHttpClient()
+    private var mOkHttpClient:OkHttpClient? = null
     override fun create(): Retrofit {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
 
      fun create(baseUrl:String):Retrofit{
+         if(mOkHttpClient == null){
+             mOkHttpClient = createOkHttpClient()
+         }
         val builder: Retrofit.Builder = Retrofit.Builder()
                 .client(mOkHttpClient)
                 .baseUrl(checkBaseUrl(baseUrl))
@@ -55,7 +58,6 @@ object RequestClientManager:BaseClientManager() {
      * @return Api接口实例
     </T> */
     fun <T> getService(clazz: Class<T>): T {
-        mRetrofit
         return getRetrofit(clazz).create(clazz)
     }
 
@@ -161,8 +163,8 @@ object RequestClientManager:BaseClientManager() {
      * 取消请求
      */
     fun cancelAll(tag:Any?){
-
-        mOkHttpClient.dispatcher.queuedCalls().forEach {
+        mOkHttpClient?:return
+        mOkHttpClient!!.dispatcher.queuedCalls().forEach {
             if(tag!=null){
                 if(it.request().tag() == tag){
                     it.cancel()
@@ -171,7 +173,7 @@ object RequestClientManager:BaseClientManager() {
                 it.cancel()
             }
         }
-        mOkHttpClient.dispatcher.runningCalls().forEach {
+        mOkHttpClient!!.dispatcher.runningCalls().forEach {
             if(tag!=null){
                 if(it.request().tag() == tag){
                     it.cancel()
