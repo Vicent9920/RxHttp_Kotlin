@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 object RequestClientManager:BaseClientManager() {
 
 
-    private val mRetrofit: Retrofit = create()
+     var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
     private val mOkHttpClient by lazy {
         createOkHttpClient()
@@ -39,7 +39,7 @@ object RequestClientManager:BaseClientManager() {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
 
-    private fun create(baseUrl:String):Retrofit{
+     fun create(baseUrl:String):Retrofit{
         val builder: Retrofit.Builder = Retrofit.Builder()
                 .client(mOkHttpClient)
                 .baseUrl(checkBaseUrl(baseUrl))
@@ -57,6 +57,7 @@ object RequestClientManager:BaseClientManager() {
      * @return Api接口实例
     </T> */
     fun <T> getService(clazz: Class<T>): T {
+        mRetrofit
         return getRetrofit(clazz).create(clazz)
     }
 
