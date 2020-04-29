@@ -32,9 +32,7 @@ object RequestClientManager:BaseClientManager() {
 
      var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
-    private val mOkHttpClient by lazy {
-        createOkHttpClient()
-    }
+    private val mOkHttpClient = createOkHttpClient()
     override fun create(): Retrofit {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
