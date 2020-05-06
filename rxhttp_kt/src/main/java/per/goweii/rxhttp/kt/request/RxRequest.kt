@@ -126,6 +126,21 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 if(handle == null){
                     handle = ExceptionHandle(t)
                 }
+                if(t is HttpException){
+                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+                        try {
+                            val msg = t.response()?.errorBody()?.string()
+                            val bean = Gson().fromJson<BaseResponse<T>>(msg, object :TypeToken<BaseResponse<T>>(){}.type)
+                            callback.invoke(bean)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            mListener?.onError(handle)
+                            return@let
+                        }
+
+
+                    }
+                }
                 mListener?.onError(handle)
             }
             mListener?.onFinish()
@@ -146,6 +161,21 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
                 if(handle == null){
                     handle = ExceptionHandle(t)
+                }
+                if(t is HttpException){
+                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+                        try {
+                            val msg = t.response()?.errorBody()?.string()
+                            val bean = Gson().fromJson<T>(msg, object :TypeToken<T>(){}.type)
+                            callback.invoke(bean)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            mListener?.onError(handle)
+                            return@let
+                        }
+
+
+                    }
                 }
                 mListener?.onError(handle)
             }
