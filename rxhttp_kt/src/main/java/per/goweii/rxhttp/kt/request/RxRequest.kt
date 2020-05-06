@@ -1,5 +1,8 @@
 package per.goweii.rxhttp.kt.request
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -67,6 +70,7 @@ class RxRequest<T, E> where E : BaseResponse<T> {
     }
 
     fun request(callback: ResultCallback<T>): Disposable {
+
         val disposable = mObservable!!.subscribe({ bean ->
             when {
                 bean == null -> {
@@ -89,8 +93,16 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     mListener?.onError(handle)
                 }
             if(t is HttpException){
-                if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false){
-                    callback.onFailed(t.code(), "${t.message}")
+                if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+                    try {
+                        val msg = t.response()?.errorBody()?.string()
+                        val bean = Gson().fromJson<BaseResponse<T>>(msg, object :TypeToken<BaseResponse<T>>(){}.type)
+                        callback.onFailed(t.code(), bean.getMsg()?:"${t.message}")
+                    } catch (e: Exception) {
+                        callback.onFailed(t.code(), "${t.message}")
+                    }
+
+
                 }
             }else{
                 callback.onFailed(-2, "其它异常:${t.message}")
