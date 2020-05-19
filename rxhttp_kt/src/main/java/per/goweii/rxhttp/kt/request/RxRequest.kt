@@ -95,15 +95,15 @@ class RxRequest<T, E> where E : BaseResponse<T> {
             if(t is HttpException){
                 if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
                     try {
-                        val msg = t.response()?.errorBody()?.string()
-                        val bean = Gson().fromJson<BaseResponse<T>>(msg, object :TypeToken<BaseResponse<T>>(){}.type)
-                        callback.onFailed(t.code(), bean.getMsg()?:"${t.message}")
+                        val msg = t.response()?.body() as BaseResponse<*>
+                        callback.onFailed(t.code(), msg.getMsg()?:"${t.message}")
                     } catch (e: Exception) {
                         callback.onFailed(t.code(), "${t.message}")
                     }
 
 
                 }
+                callback.onFailed(t.code(), "${t.message}")
             }else{
                 callback.onFailed(-2, "其它异常:${t.message}")
             }
@@ -129,9 +129,8 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 if(t is HttpException){
                     if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
                         try {
-                            val msg = t.response()?.errorBody()?.string()
-                            val bean = Gson().fromJson<BaseResponse<T>>(msg, object :TypeToken<BaseResponse<T>>(){}.type)
-                            callback.invoke(bean)
+                            val msg = t.response()?.body() as BaseResponse<T>
+                            callback.invoke(msg)
                         } catch (e: Exception) {
                             e.printStackTrace()
                             mListener?.onError(handle)
@@ -165,9 +164,8 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 if(t is HttpException){
                     if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
                         try {
-                            val msg = t.response()?.errorBody()?.string()
-                            val bean = Gson().fromJson<T>(msg, object :TypeToken<T>(){}.type)
-                            callback.invoke(bean)
+                            val msg = t.response()?.body() as T
+                            callback.invoke(msg)
                         } catch (e: Exception) {
                             e.printStackTrace()
                             mListener?.onError(handle)
