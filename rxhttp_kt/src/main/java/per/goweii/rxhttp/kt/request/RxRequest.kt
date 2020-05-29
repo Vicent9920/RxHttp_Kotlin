@@ -94,15 +94,9 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 }
             if(t is HttpException){
                 if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-                    try {
-                        val msg = t.response()?.body() as BaseResponse<*>
-                        callback.onFailed(t.code(), msg.getMsg()?:"${t.message}")
-                    } catch (e: Exception) {
-                        callback.onFailed(t.code(), "${t.message}")
-                    }
-
-
-                }
+                    val errorMsg = t.response()?.errorBody()?.string()
+                    callback.onFailed(t.code(),errorMsg?:t.message())
+                }else
                 callback.onFailed(t.code(), "${t.message}")
             }else{
                 callback.onFailed(-2, "其它异常:${t.message}")
@@ -127,18 +121,18 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     handle = ExceptionHandle(t)
                 }
                 if(t is HttpException){
-                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-                        try {
-                            val msg = t.response()?.body() as BaseResponse<T>
-                            callback.invoke(msg)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            mListener?.onError(handle)
-                            return@let
-                        }
-
-
-                    }
+                    // 无法获取实体，建议直接返回字符串
+//                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+//                        try {
+//                            val errorMsg = t.response()?.errorBody()?.string()
+//                            callback.invoke(result)
+//                        } catch (e: Exception) {
+//                            mListener?.onError(handle)
+//                            return@let
+//                        }
+//
+//
+//                    }
                 }
                 mListener?.onError(handle)
             }
@@ -161,20 +155,21 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 if(handle == null){
                     handle = ExceptionHandle(t)
                 }
-                if(t is HttpException){
-                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-                        try {
-                            val msg = t.response()?.body() as T
-                            callback.invoke(msg)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            mListener?.onError(handle)
-                            return@let
-                        }
-
-
-                    }
-                }
+                // 无法获取实体，建议直接返回字符串
+//                if(t is HttpException){
+//                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+//                        try {
+//                            val errorMsg = t.response()?.errorBody()?.string()
+//                            val result = Gson().fromJson<T>(errorMsg,object :TypeToken<T>(){}.type)
+//                            callback.invoke(result)
+//                        } catch (e: Exception) {
+//                            mListener?.onError(handle)
+//                            return@let
+//                        }
+//
+//
+//                    }
+//                }
                 mListener?.onError(handle)
             }
             mListener?.onFinish()

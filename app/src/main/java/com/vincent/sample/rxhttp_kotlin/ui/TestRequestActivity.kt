@@ -2,6 +2,7 @@ package com.vincent.sample.rxhttp_kotlin.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
@@ -12,7 +13,10 @@ import com.vincent.sample.rxhttp_kotlin.entity.RegisterBean
 import com.vincent.sample.rxhttp_kotlin.entity.UploadImgBean
 import com.vincent.sample.rxhttp_kotlin.net.FreeApi
 import kotlinx.android.synthetic.main.activity_test_request.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
 import per.goweii.rxhttp.kt.request.RequestListener
@@ -70,15 +74,16 @@ class TestRequestActivity : AppCompatActivity() {
              */
             override fun getMultiHttpCode(): (code: Int) -> Boolean {
                 return {
-                    when(it){
-                        404 -> {
-                            true
-                        }
-                        500 -> {
-                            true
-                        }
-                        else -> false
-                    }
+//                    when(it){
+//                        404 -> {
+//                            true
+//                        }
+//                        500 -> {
+//                            true
+//                        }
+//                        else -> false
+//                    }
+                    true
                 }
             }
 
@@ -123,6 +128,10 @@ class TestRequestActivity : AppCompatActivity() {
             override fun setOkHttpClient(builder: OkHttpClient.Builder) {
                 builder.hostnameVerifier(HostnameVerifier { hostname, session -> true })
 //                super.setOkHttpClient(builder)
+            }
+
+            override fun isDebug(): Boolean {
+                return true
             }
         })
 
@@ -172,6 +181,7 @@ class TestRequestActivity : AppCompatActivity() {
      * 获取轮播条广告
      */
     private fun getBanner() {
+        Log.i("TAG","getBanner")
         mRxLife.add(
             RxHttp.request(FreeApi.api().getBannerList()).listener(reqListener)
                 .request(object : ResultCallback<List<Banner>> {
@@ -222,7 +232,7 @@ class TestRequestActivity : AppCompatActivity() {
      */
     @SuppressLint("SetTextI18n")
     private fun singlePoetry() {
-
+        Log.w("TAG","singlePoetry")
         mRxLife.add(RxHttp.customRequest(FreeApi.api().singlePoetry())
             .listener(reqListener).customEntityRequest {
                 tv_log.text = "${tv_log.text}\nonSuccess {${Gson().toJson(it)}}}"
@@ -236,22 +246,46 @@ class TestRequestActivity : AppCompatActivity() {
      */
     @SuppressLint("SetTextI18n")
     private fun getCurrentDate() {
+        val map = HashMap<String, Any>()
+        map["clid"] = "246"
+        map["jqid"] = "807f796f0b52645f12430b5d187c179f"
+        map["gisX"] = 1.0
+        map["gisY"] = 2.0
+        map["clzt"] = "0304"
         mRxLife.add(
             RxHttp.request(
                 FreeApi.api()
-                    .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}")
-            )
+                    .test(Gson().toJson(map).toRequestBody("application/json".toMediaTypeOrNull()),
+                        "Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRfaWQiOiIwMDAwMDAiLCJ1c2VyX25hbWUiOiJ0YW5naHVhIiwiZGVwdF9sb24iOiIxMDMuOTU3MzIiLCJyZWFsX25hbWUiOiLnrqHnkIblkZgiLCJhdmF0YXIiOiIiLCJhdXRob3JpdGllcyI6WyLkuK3pmJ_nrqHnkIblkZgiXSwiY2xpZW50X2lkIjoic2FiZXIiLCJyb2xlX25hbWUiOiLkuK3pmJ_nrqHnkIblkZgiLCJsaWNlbnNlIjoicG93ZXJlZCBieSBibGFkZXgiLCJ1c2VyX2lkIjoiMTEyMzU5ODgyMTczODY3NTIwOCIsInJvbGVfaWQiOiI2OThlOGE5YjU3YzU2ZGM4Njc0Mzg4MTA1ZDZiYjE5NSIsInNjb3BlIjpbImFsbCJdLCJuaWNrX25hbWUiOiLllJDmoaYiLCJjdGkiOnsibW0iOiIiLCJqbnptYyI6IiIsImFndGlkIjoiIiwidXJsIjoiIn0sInBtcV91aWQiOiIxMTIzNTk4ODIxNzM4Njc1MjA4fGFwcCIsInVzZXJUeXBlIjoiYXBwIiwiZGVwdF9pZCI6IjM3OTYwNTAzODAiLCJjenQiOnt9LCJkZXB0X2xhdCI6IjMwLjk1NjMxMiIsImp0aSI6ImQ4N2IxNTM5LWVkOTItNDYwOC1hZmZmLTZlMjZiNjQyMWYwNyIsImFjY291bnQiOiJ0YW5naHVhIn0.rYr44HueJFYIqGsAOXXXV8UDTE_gLjGcmgHajkxQcOE",
+                        "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRfaWQiOiIwMDAwMDAiLCJ1c2VyX25hbWUiOiJ0YW5naHVhIiwiZGVwdF9sb24iOiIxMDMuOTU3MzIiLCJyZWFsX25hbWUiOiLnrqHnkIblkZgiLCJhdmF0YXIiOiIiLCJhdXRob3JpdGllcyI6WyLkuK3pmJ_nrqHnkIblkZgiXSwiY2xpZW50X2lkIjoic2FiZXIiLCJyb2xlX25hbWUiOiLkuK3pmJ_nrqHnkIblkZgiLCJsaWNlbnNlIjoicG93ZXJlZCBieSBibGFkZXgiLCJ1c2VyX2lkIjoiMTEyMzU5ODgyMTczODY3NTIwOCIsInJvbGVfaWQiOiI2OThlOGE5YjU3YzU2ZGM4Njc0Mzg4MTA1ZDZiYjE5NSIsInNjb3BlIjpbImFsbCJdLCJuaWNrX25hbWUiOiLllJDmoaYiLCJjdGkiOnsibW0iOiIiLCJqbnptYyI6IiIsImFndGlkIjoiIiwidXJsIjoiIn0sInBtcV91aWQiOiIxMTIzNTk4ODIxNzM4Njc1MjA4fGFwcCIsInVzZXJUeXBlIjoiYXBwIiwiZGVwdF9pZCI6IjM3OTYwNTAzODAiLCJjenQiOnt9LCJkZXB0X2xhdCI6IjMwLjk1NjMxMiIsImp0aSI6ImQ4N2IxNTM5LWVkOTItNDYwOC1hZmZmLTZlMjZiNjQyMWYwNyIsImFjY291bnQiOiJ0YW5naHVhIn0.rYr44HueJFYIqGsAOXXXV8UDTE_gLjGcmgHajkxQcOE",
+                        "app","http://192.168.3.99:50003/blade-base/zzclxx/setczzt"))
                 .listener(reqListener)
-                .customRequest {
-                    // 访问成功
-                    if (it.getCode() == 1) {
-                        tv_log.text =
-                            "${tv_log.text}\nonSuccess {code-${it.getCode()} data-${Gson().toJson(it.getData())}}"
-                    } else {
-                        tv_log.text =
-                            "${tv_log.text}\nonFailed {code-${it.getCode()} msg-${it.getMsg()}}"
+                .request(object :ResultCallback<Any>{
+                    override fun onSuccess(code: Int, data: Any?) {
+                        tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
                     }
-                })
+
+                    override fun onFailed(code: Int, msg: String?) {
+                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+                    }
+                }))
+
+//        mRxLife.add(
+//            RxHttp.request(
+//                FreeApi.api()
+//                    .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}")
+//            )
+//                .listener(reqListener)
+//                .customRequest {
+//                    // 访问成功
+//                    if (it.getCode() == 1) {
+//                        tv_log.text =
+//                            "${tv_log.text}\nonSuccess {code-${it.getCode()} data-${Gson().toJson(it.getData())}}"
+//                    } else {
+//                        tv_log.text =
+//                            "${tv_log.text}\nonFailed {code-${it.getCode()} msg-${it.getMsg()}}"
+//                    }
+//                })
     }
 
     private fun uploadImg(content: String, imgFile: File) {

@@ -36,8 +36,7 @@ object FreeApi: Api() {
          * 微信公众号列表
          */
         @Headers(Header.CACHE_ALIVE_SECOND + ":" + 10)
-        // 正确地址 wxarticle/chapters/json 下面测试异常，因此不予修改
-        @GET("wxarticlelele/chapters/json")
+        @GET("wxarticle/chapters/json")
         fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
 
         /**
@@ -69,6 +68,16 @@ object FreeApi: Api() {
          */
         @GET
         fun getDate(@Url path: String): Observable<ResponseBean<DateData>>
+
+        /**
+         * http 请求 // http://www.mxnzp.com/api/holiday/single/20200102
+         */
+        @POST
+        fun test(@Body body: RequestBody,
+                 @retrofit2.http.Header("Authorization")author:String,
+                 @retrofit2.http.Header("Blade-Auth")blade:String,
+                 @retrofit2.http.Header("User-Type")type:String,
+                 @Url path: String): Observable<ResponseBean<Any>>
 
         /**
          * 键		值

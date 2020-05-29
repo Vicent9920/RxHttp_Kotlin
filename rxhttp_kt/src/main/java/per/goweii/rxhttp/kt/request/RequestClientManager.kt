@@ -12,7 +12,6 @@ import per.goweii.rxhttp.kt.core.cookie.store.PersistentCookieStore
 import per.goweii.rxhttp.kt.core.getCacheDir
 import per.goweii.rxhttp.kt.core.manager.BaseClientManager
 import per.goweii.rxhttp.kt.request.interceptor.*
-import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,25 +26,25 @@ import java.util.concurrent.TimeUnit
  * <p>版本号：1<p>
  *
  */
-object RequestClientManager:BaseClientManager() {
+object RequestClientManager : BaseClientManager() {
 
 
-      var mRetrofit: Retrofit = create()
+    var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
-    private var mOkHttpClient:OkHttpClient? = null
+    private var mOkHttpClient: OkHttpClient? = null
     override fun create(): Retrofit {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
 
-     fun create(baseUrl:String):Retrofit{
-         if(mOkHttpClient == null){
-             mOkHttpClient = createOkHttpClient()
-         }
+    fun create(baseUrl: String): Retrofit {
+        if (mOkHttpClient == null) {
+            mOkHttpClient = createOkHttpClient()
+        }
         val builder: Retrofit.Builder = Retrofit.Builder()
-                .client(mOkHttpClient)
-                .baseUrl(checkBaseUrl(baseUrl))
+            .client(mOkHttpClient)
+            .baseUrl(checkBaseUrl(baseUrl))
         builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        val gson = RxHttp.getRequestSetting()?.getGson()?:Gson()
+        val gson = RxHttp.getRequestSetting()?.getGson() ?: Gson()
         builder.addConverterFactory(GsonConverterFactory.create(gson))
         return builder.build()
     }
@@ -63,7 +62,7 @@ object RequestClientManager:BaseClientManager() {
 
     private fun getRetrofit(clazz: Class<*>?): Retrofit {
 
-        clazz?:return mRetrofit
+        clazz ?: return mRetrofit
         var retrofit: Retrofit? = null
         if (mRetrofitMap.isNotEmpty()) {
             val iterator = mRetrofitMap.entries.iterator()
@@ -109,18 +108,20 @@ object RequestClientManager:BaseClientManager() {
         if (RxHttp.getRequestSetting()?.isDebug() == true) {
             val logging = HttpLoggingInterceptor()
             logging.level = HttpLoggingInterceptor.Level.BODY
-//            builder.addInterceptor(logging)
-            builder.addNetworkInterceptor(logging)
+            builder.addInterceptor(logging)
         }
         builder.cookieJar(CookieJarImpl(PersistentCookieStore(RxHttp.mAppContext!!)))
         // 设置缓存
         builder.cache(createCache())
         // 设置3个超时时长
-        val timeout = RxHttp.getRequestSetting()?.getTimeout()?:1
-        val connectTimeout = RxHttp.getRequestSetting()?.getConnectTimeout()?:0
-        val readTimeout = RxHttp.getRequestSetting()?.getReadTimeout()?:0
-        val writeTimeout = RxHttp.getRequestSetting()?.getWriteTimeout()?:0
-        builder.connectTimeout(if (connectTimeout > 0) connectTimeout else timeout, TimeUnit.MILLISECONDS)
+        val timeout = RxHttp.getRequestSetting()?.getTimeout() ?: 1
+        val connectTimeout = RxHttp.getRequestSetting()?.getConnectTimeout() ?: 0
+        val readTimeout = RxHttp.getRequestSetting()?.getReadTimeout() ?: 0
+        val writeTimeout = RxHttp.getRequestSetting()?.getWriteTimeout() ?: 0
+        builder.connectTimeout(
+            if (connectTimeout > 0) connectTimeout else timeout,
+            TimeUnit.MILLISECONDS
+        )
         builder.readTimeout(if (readTimeout > 0) readTimeout else timeout, TimeUnit.MILLISECONDS)
         builder.writeTimeout(if (writeTimeout > 0) writeTimeout else timeout, TimeUnit.MILLISECONDS)
         // 设置应用层拦截器
@@ -130,7 +131,7 @@ object RequestClientManager:BaseClientManager() {
         CacheControlInterceptor.addTo(builder)
         val interceptors = RxHttp.getRequestSetting()!!.getInterceptors()
         if (interceptors.isNullOrEmpty().not()) {
-            for (interceptor in interceptors!!) {
+            for (interceptor in interceptors) {
                 builder.addInterceptor(interceptor)
             }
         }
@@ -156,29 +157,29 @@ object RequestClientManager:BaseClientManager() {
         if (!cacheFile.exists()) {
             cacheFile.mkdirs()
         }
-        return Cache(cacheFile, RxHttp.getRequestSetting()?.getCacheSize()?:0L)
+        return Cache(cacheFile, RxHttp.getRequestSetting()?.getCacheSize() ?: 0L)
     }
 
     /**
      * 取消请求
      */
-    fun cancelAll(tag:Any?){
-        mOkHttpClient?:return
+    fun cancelAll(tag: Any?) {
+        mOkHttpClient ?: return
         mOkHttpClient!!.dispatcher.queuedCalls().forEach {
-            if(tag!=null){
-                if(it.request().tag() == tag){
+            if (tag != null) {
+                if (it.request().tag() == tag) {
                     it.cancel()
                 }
-            }else{
+            } else {
                 it.cancel()
             }
         }
         mOkHttpClient!!.dispatcher.runningCalls().forEach {
-            if(tag!=null){
-                if(it.request().tag() == tag){
+            if (tag != null) {
+                if (it.request().tag() == tag) {
                     it.cancel()
                 }
-            }else{
+            } else {
                 it.cancel()
             }
         }

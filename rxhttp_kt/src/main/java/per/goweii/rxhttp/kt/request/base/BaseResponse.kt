@@ -8,17 +8,18 @@ package per.goweii.rxhttp.kt.request.base
  * <p>版本号：1<p>
  *
  */
-interface BaseResponse<T>{
-    fun getCode(): Int
+abstract class BaseResponse<T>{
 
-    fun setCode(code: Int)
+    abstract fun getCode(): Int
 
-    fun getData(): T?
+    abstract fun setCode(code: Int)
 
-    fun setData(data: T?)
+    abstract fun getData(): T?
 
-    fun getMsg(): String?
+    abstract fun setData(data: T?)
 
-    fun setMsg(msg: String?)
+    abstract fun getMsg(): String?
+
+    abstract fun setMsg(msg: String?)
 
 }
