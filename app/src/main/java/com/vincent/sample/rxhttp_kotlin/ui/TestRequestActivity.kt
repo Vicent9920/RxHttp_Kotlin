@@ -17,6 +17,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
 import per.goweii.rxhttp.kt.request.RequestListener
@@ -89,7 +90,7 @@ class TestRequestActivity : AppCompatActivity() {
 
             // Code 判断
             override fun getSuccessCode(): Int {
-                return FreeApi.Code.SUCCESS
+                return 200
             }
 
             // 重定向地址设置
@@ -126,12 +127,13 @@ class TestRequestActivity : AppCompatActivity() {
             }
 
             override fun setOkHttpClient(builder: OkHttpClient.Builder) {
-                builder.hostnameVerifier(HostnameVerifier { hostname, session -> true })
-//                super.setOkHttpClient(builder)
+                super.setOkHttpClient(builder)
             }
 
-            override fun isDebug(): Boolean {
-                return true
+
+
+            override fun isDebug(): Pair<Boolean, HttpLoggingInterceptor.Level> {
+                return Pair(true,HttpLoggingInterceptor.Level.NONE)
             }
         })
 

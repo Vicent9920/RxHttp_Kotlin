@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 
 /**
@@ -125,6 +126,6 @@ interface RequestSetting {
     /**
      * 是否打开调试模式
      */
-    fun isDebug(): Boolean
+    fun isDebug(): Pair<Boolean,HttpLoggingInterceptor.Level>
 }
 

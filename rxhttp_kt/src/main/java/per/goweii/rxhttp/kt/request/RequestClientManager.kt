@@ -105,9 +105,9 @@ object RequestClientManager : BaseClientManager() {
     private fun createOkHttpClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
         // 设置调试模式打印日志
-        if (RxHttp.getRequestSetting()?.isDebug() == true) {
+        if (RxHttp.getRequestSetting()?.isDebug()?.first == true) {
             val logging = HttpLoggingInterceptor()
-            logging.level = HttpLoggingInterceptor.Level.BODY
+            logging.level = RxHttp.getRequestSetting()?.isDebug()!!.second
             builder.addInterceptor(logging)
         }
         builder.cookieJar(CookieJarImpl(PersistentCookieStore(RxHttp.mAppContext!!)))

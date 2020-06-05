@@ -3,6 +3,7 @@ package per.goweii.rxhttp.kt.request.setting
 import com.google.gson.Gson
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 
 /**
@@ -101,7 +102,7 @@ abstract class DefaultRequestSetting : RequestSetting{
         return null
     }
 
-    override fun isDebug(): Boolean {
-        return false
+    override fun isDebug(): Pair<Boolean,HttpLoggingInterceptor.Level> {
+        return Pair(false,HttpLoggingInterceptor.Level.BODY)
     }
 }
