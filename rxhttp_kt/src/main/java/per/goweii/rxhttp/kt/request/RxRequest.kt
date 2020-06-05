@@ -84,7 +84,6 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 }
             }
         }, { t ->
-
                 mListener?.let {
                     var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
                     if(handle == null){
@@ -111,9 +110,9 @@ class RxRequest<T, E> where E : BaseResponse<T> {
         return disposable
     }
 
-    fun customRequest(callback: ( (BaseResponse<T>) -> Unit)): Disposable {
+    fun customRequest(successCallback: ( (BaseResponse<T>) -> Unit)): Disposable {
         val disposable = mObservable!!.subscribe({ bean ->
-            callback.invoke(bean)
+            successCallback.invoke(bean)
         }, { t ->
             mListener?.let {
                 var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
@@ -121,18 +120,37 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     handle = ExceptionHandle(t)
                 }
                 if(t is HttpException){
-                    // 无法获取实体，建议直接返回字符串
-//                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-//                        try {
-//                            val errorMsg = t.response()?.errorBody()?.string()
-//                            callback.invoke(result)
-//                        } catch (e: Exception) {
-//                            mListener?.onError(handle)
-//                            return@let
-//                        }
-//
-//
-//                    }
+                     // 无法获取实体，建议直接返回字符串
+                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+                        val errorMsg = t.response()?.errorBody()?.string()
+                        val result = object :BaseResponse<T>(){
+                            override fun getCode(): Int {
+                                return t.code()
+                            }
+
+                            override fun setCode(code: Int) {
+
+                            }
+
+                            override fun getData(): T? {
+                                return null
+                            }
+
+                            override fun setData(data: T?) {
+
+                            }
+
+                            override fun getMsg(): String? {
+                                return errorMsg?:t.message()
+                            }
+
+                            override fun setMsg(msg: String?) {
+
+                            }
+
+                        }
+                        successCallback.invoke(result)
+                    }
                 }
                 mListener?.onError(handle)
             }
@@ -155,21 +173,21 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 if(handle == null){
                     handle = ExceptionHandle(t)
                 }
-                // 无法获取实体，建议直接返回字符串
-//                if(t is HttpException){
-//                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-//                        try {
-//                            val errorMsg = t.response()?.errorBody()?.string()
-//                            val result = Gson().fromJson<T>(errorMsg,object :TypeToken<T>(){}.type)
-//                            callback.invoke(result)
-//                        } catch (e: Exception) {
-//                            mListener?.onError(handle)
-//                            return@let
-//                        }
-//
-//
-//                    }
-//                }
+                 // 无法获取实体，建议直接返回字符串
+                if(t is HttpException){
+                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
+                        try {
+                            val errorMsg = t.response()?.errorBody()?.string()
+                            val result = Gson().fromJson<T>(errorMsg,object :TypeToken<T>(){}.type)
+                            callback.invoke(result)
+                        } catch (e: Exception) {
+                            mListener?.onError(handle)
+                            return@let
+                        }
+
+
+                    }
+                }
                 mListener?.onError(handle)
             }
             mListener?.onFinish()
