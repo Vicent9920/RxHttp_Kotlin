@@ -1,5 +1,6 @@
 package per.goweii.rxhttp.kt.core
 
+import android.app.Application
 import android.content.Context
 import io.reactivex.Observable
 import per.goweii.rxhttp.kt.R
@@ -15,11 +16,14 @@ import per.goweii.rxhttp.kt.request.exception.NullRequestSettingException
 
 object RxHttp {
 
-      var mAppContext: Context? = null
+     internal var mAppContext: Context? = null
 
     private var mRequestSetting: RequestSetting? = null
     private var mDownloadSetting: DownloadSetting? = null
 
+    fun init(context: Application){
+        mAppContext = context
+    }
 
     private fun checkInit() {
         if(mAppContext == null){
