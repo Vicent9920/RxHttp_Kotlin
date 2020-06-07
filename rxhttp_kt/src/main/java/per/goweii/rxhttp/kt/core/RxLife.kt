@@ -3,27 +3,29 @@ package per.goweii.rxhttp.kt.core
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
-class RxLife private constructor(){
+interface RxLife {
 
 
-    private var mCompositeDisposable = CompositeDisposable()
+    fun destroy()
 
-    fun destroy(){
-        if(mCompositeDisposable.isDisposed)return
+    fun add(d: Disposable)
+
+    companion object {
+
+        fun create(): RxLife {
+            return RxLifeImp(CompositeDisposable())
+        }
+    }
+}
+
+class RxLifeImp(private val mCompositeDisposable: CompositeDisposable) : RxLife {
+
+    override fun destroy() {
+        if (mCompositeDisposable.isDisposed) return
         mCompositeDisposable.dispose()
     }
 
-    fun add(d: Disposable) {
-        if ( mCompositeDisposable.isDisposed) {
-            mCompositeDisposable = CompositeDisposable()
-        }
+    override fun add(d: Disposable) {
         mCompositeDisposable.add(d)
-    }
-
-    companion object{
-        @JvmStatic
-        fun create(): RxLife{
-            return RxLife()
-        }
     }
 }

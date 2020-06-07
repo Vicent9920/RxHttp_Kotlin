@@ -20,17 +20,20 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
+import per.goweii.rxhttp.kt.request.RequestClientManager
 import per.goweii.rxhttp.kt.request.RequestListener
 import per.goweii.rxhttp.kt.request.ResultCallback
 import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 import per.goweii.rxhttp.kt.request.setting.DefaultRequestSetting
 import per.goweii.rxhttp.kt.request.setting.ParameterGetter
 import per.goweii.rxhttp.kt.request.utils.RequestBodyUtils.builder
+import retrofit2.Retrofit
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSession
+import kotlin.collections.HashMap
 
 
 class TestRequestActivity : AppCompatActivity() {
@@ -68,72 +71,27 @@ class TestRequestActivity : AppCompatActivity() {
                 return FreeApi.Config.BASE_URL
             }
 
-            /**
-             * 根据后端返回的错误进行处理，
-             * 未处理的返回false，标准模式下会进入请求失败的回调
-             * 返回true 意味着消费当前事件，不会进入请求成功或者失败的回调
-             */
-            override fun getMultiHttpCode(): (code: Int) -> Boolean {
-                return {
-//                    when(it){
-//                        404 -> {
-//                            true
-//                        }
-//                        500 -> {
-//                            true
-//                        }
-//                        else -> false
-//                    }
-                    true
-                }
-            }
+
 
             // Code 判断
             override fun getSuccessCode(): Int {
-                return 200
+                return 0
             }
+
+
 
             // 重定向地址设置
             override fun getRedirectBaseUrl(): Map<String, String> {
-                val urls: MutableMap<String, String> =
-                    HashMap(1)
+                val urls: MutableMap<String, String> = HashMap(1)
                 urls[FreeApi.Config.BASE_URL_OTHER_NAME] = FreeApi.Config.BASE_URL_OTHER
                 return urls
             }
 
-            // 公共参数设置
-            override fun getStaticHeaderParameter(): Map<String, String> {
-//                val parameters: MutableMap<String, String> =
-//                    HashMap(3)
-//                parameters["system"] = "android"
-//                parameters["version_code"] = "1"
-//                parameters["device_num"] = "666"
-//                return parameters
-                return super.getStaticHeaderParameter()
+            override fun getWriteTimeout(): Long {
+                return 50*1000
             }
-
-            // 设置动态参数
-            override fun getDynamicHeaderParameter(): Map<String, ParameterGetter> {
-//                val parameters: HashMap<String, ParameterGetter> =
-//                    HashMap()
-//                val value = object :ParameterGetter{
-//                    override fun get(): String {
-//                        return "9527"
-//                    }
-//                }
-//                parameters["id"] = value
-//                return parameters
-                return super.getDynamicHeaderParameter()
-            }
-
-            override fun setOkHttpClient(builder: OkHttpClient.Builder) {
-                super.setOkHttpClient(builder)
-            }
-
-
-
             override fun isDebug(): Pair<Boolean, HttpLoggingInterceptor.Level> {
-                return Pair(true,HttpLoggingInterceptor.Level.NONE)
+                return Pair(true,HttpLoggingInterceptor.Level.BODY)
             }
         })
 
@@ -154,6 +112,8 @@ class TestRequestActivity : AppCompatActivity() {
         tv_get_date.setOnClickListener {
             getCurrentDate()
         }
+
+        RequestClientManager.refreshBaseUrl("http://www.google.com/")
     }
 
     /**

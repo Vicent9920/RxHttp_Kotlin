@@ -29,14 +29,14 @@ import java.util.concurrent.TimeUnit
 object RequestClientManager : BaseClientManager() {
 
 
-    var mRetrofit: Retrofit = create()
+    private var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
     private var mOkHttpClient: OkHttpClient? = null
     override fun create(): Retrofit {
         return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
     }
 
-    fun create(baseUrl: String): Retrofit {
+    private fun create(baseUrl: String): Retrofit {
         if (mOkHttpClient == null) {
             mOkHttpClient = createOkHttpClient()
         }
@@ -48,6 +48,9 @@ object RequestClientManager : BaseClientManager() {
         builder.addConverterFactory(GsonConverterFactory.create(gson))
         return builder.build()
     }
+    fun refreshBaseUrl(baseUrl: String){
+        mRetrofit = create(baseUrl)
+    }
 
     /**
      * 创建Api接口实例
@@ -56,7 +59,7 @@ object RequestClientManager : BaseClientManager() {
      * @param <T>   Api接口
      * @return Api接口实例
     </T> */
-    fun <T> getService(clazz: Class<T>): T {
+    internal fun <T> getService(clazz: Class<T>): T {
         return getRetrofit(clazz).create(clazz)
     }
 
@@ -114,16 +117,17 @@ object RequestClientManager : BaseClientManager() {
         // 设置缓存
         builder.cache(createCache())
         // 设置3个超时时长
-        val timeout = RxHttp.getRequestSetting()?.getTimeout() ?: 1
+        val timeout = RxHttp.getRequestSetting()?.getConnectTimeout() ?: 0
         val connectTimeout = RxHttp.getRequestSetting()?.getConnectTimeout() ?: 0
         val readTimeout = RxHttp.getRequestSetting()?.getReadTimeout() ?: 0
         val writeTimeout = RxHttp.getRequestSetting()?.getWriteTimeout() ?: 0
-        builder.connectTimeout(
-            if (connectTimeout > 0) connectTimeout else timeout,
-            TimeUnit.MILLISECONDS
-        )
-        builder.readTimeout(if (readTimeout > 0) readTimeout else timeout, TimeUnit.MILLISECONDS)
-        builder.writeTimeout(if (writeTimeout > 0) writeTimeout else timeout, TimeUnit.MILLISECONDS)
+
+        builder.connectTimeout(if(connectTimeout>0)connectTimeout else timeout ,TimeUnit.MILLISECONDS)
+        builder.writeTimeout(if(writeTimeout >0) writeTimeout else timeout,TimeUnit.MILLISECONDS)
+        builder.readTimeout(if(readTimeout >0) readTimeout else timeout ,TimeUnit.MILLISECONDS)
+        if(writeTimeout>0){
+
+        }
         // 设置应用层拦截器
         BaseUrlRedirectInterceptor.addTo(builder)
         PublicHeadersInterceptor.addTo(builder)

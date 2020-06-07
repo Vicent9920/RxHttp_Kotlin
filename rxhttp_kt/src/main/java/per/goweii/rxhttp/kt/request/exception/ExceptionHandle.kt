@@ -27,7 +27,7 @@ const val HTTP = 3
 const val HOST = 4
 const val SSL = 5
 
-class ExceptionHandle constructor(val e: Throwable) {
+open class ExceptionHandle constructor(val e: Throwable) {
 
     val code: Int by lazy {
         onGetCode(e)

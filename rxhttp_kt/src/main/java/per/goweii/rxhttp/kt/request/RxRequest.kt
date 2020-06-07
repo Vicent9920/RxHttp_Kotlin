@@ -1,7 +1,6 @@
 package per.goweii.rxhttp.kt.request
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -29,26 +28,27 @@ class RxRequest<T, E> where E : BaseResponse<T> {
     companion object {
         @JvmStatic
         fun <T, E : BaseResponse<T>> create(observable: Observable<E>): RxRequest<T, E> {
-            return RxRequest(observable,null)
+            return RxRequest(observable, null)
         }
 
         @JvmStatic
         fun <T, E : BaseResponse<T>> createCustom(observable: Observable<T>): RxRequest<T, E> {
-            return RxRequest(null,observable)
+            return RxRequest(null, observable)
         }
     }
 
-    private  var mObservable: Observable<E>? = null
-    private  var mObservable2: Observable<T>? = null
+    private var mObservable: Observable<E>? = null
+    private var mObservable2: Observable<T>? = null
 
-    private constructor(observable: Observable<E>?,observable2: Observable<T>?) {
-        if(observable2 == null){
-            this.mObservable = observable!!.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-        }else{
-            this.mObservable2 = observable2.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+    private constructor(observable: Observable<E>?, observable2: Observable<T>?) {
+        if (observable2 == null) {
+            this.mObservable =
+                observable!!.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        } else {
+            this.mObservable2 =
+                observable2.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         }
     }
-
 
 
     /**
@@ -77,125 +77,147 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                     callback.onFailed(-1, "返回为空")
                 }
                 isSuccess(bean.getCode()).not() -> {
-                    callback.onFailed(bean.getCode(), bean.getMsg()?:"请求失败")
+                    callback.onFailed(bean.getCode(), bean.getMsg() ?: "请求失败")
                 }
                 else -> {
                     callback.onSuccess(bean.getCode(), bean.getData())
                 }
             }
         }, { t ->
-                mListener?.let {
-                    var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
-                    if(handle == null){
-                        handle = ExceptionHandle(t)
-                    }
+            var handle: ExceptionHandle =
+                RxHttp.getRequestSetting()?.getExceptionHandle(t) ?: ExceptionHandle(t)
+            if (t is HttpException) {
+                if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
                     mListener?.onError(handle)
-                }
-            if(t is HttpException){
-                if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
                     val errorMsg = t.response()?.errorBody()?.string()
-                    callback.onFailed(t.code(),errorMsg?:t.message())
-                }else
-                callback.onFailed(t.code(), "${t.message}")
-            }else{
-                callback.onFailed(-2, "其它异常:${t.message}")
+                    callback.onFailed(t.code(), errorMsg ?: t.message())
+                } else
+                    mListener?.onFinish()
+
+            } else {
+                mListener?.onError(handle)
+                callback.onFailed(handle.code, handle.msg)
             }
-            mListener?.onFinish()
         }, {
             mListener?.onFinish()
         },
             {
-                mListener?.onStart() })
+                mListener?.onStart()
+            })
         mRxLife?.add(disposable)
         return disposable
     }
 
-    fun customRequest(successCallback: ( (BaseResponse<T>) -> Unit)): Disposable {
+    fun customRequest(successCallback: ((BaseResponse<T>) -> Unit)): Disposable {
         val disposable = mObservable!!.subscribe({ bean ->
             successCallback.invoke(bean)
         }, { t ->
-            mListener?.let {
-                var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
-                if(handle == null){
-                    handle = ExceptionHandle(t)
-                }
-                if(t is HttpException){
-                     // 无法获取实体，建议直接返回字符串
-                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-                        val errorMsg = t.response()?.errorBody()?.string()
-                        val result = object :BaseResponse<T>(){
-                            override fun getCode(): Int {
-                                return t.code()
-                            }
+            val handle: ExceptionHandle =
+                RxHttp.getRequestSetting()?.getExceptionHandle(t) ?: ExceptionHandle(t)
 
-                            override fun setCode(code: Int) {
 
-                            }
+            if (t is HttpException) {
+                // 无法获取实体，建议直接返回字符串
+                if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
+                    mListener?.onError(handle)
+                    val errorMsg = t.response()?.errorBody()?.string()
+                    val result = object : BaseResponse<T>() {
+                        override fun getCode(): Int {
+                            return t.code()
+                        }
 
-                            override fun getData(): T? {
-                                return null
-                            }
-
-                            override fun setData(data: T?) {
-
-                            }
-
-                            override fun getMsg(): String? {
-                                return errorMsg?:t.message()
-                            }
-
-                            override fun setMsg(msg: String?) {
-
-                            }
+                        override fun setCode(code: Int) {
 
                         }
-                        successCallback.invoke(result)
+
+                        override fun getData(): T? {
+                            return null
+                        }
+
+                        override fun setData(data: T?) {
+
+                        }
+
+                        override fun getMsg(): String? {
+                            return errorMsg ?: t.message()
+                        }
+
+                        override fun setMsg(msg: String?) {
+
+                        }
+
                     }
+                    successCallback.invoke(result)
+                } else {
+                    mListener?.onFinish()
                 }
+            } else {
                 mListener?.onError(handle)
+                val result = object : BaseResponse<T>() {
+                    override fun getCode(): Int {
+                        return handle.code
+                    }
+
+                    override fun setCode(code: Int) {
+
+                    }
+
+                    override fun getData(): T? {
+                        return null
+                    }
+
+                    override fun setData(data: T?) {
+
+                    }
+
+                    override fun getMsg(): String? {
+                        return handle.msg
+                    }
+
+                    override fun setMsg(msg: String?) {
+
+                    }
+
+                }
+                successCallback.invoke(result)
             }
-            mListener?.onFinish()
         }, {
             mListener?.onFinish()
         },
             {
-                mListener?.onStart() })
+                mListener?.onStart()
+            })
         mRxLife?.add(disposable)
         return disposable
     }
 
-    fun customEntityRequest(callback: ( (T) -> Unit)): Disposable {
+    fun customEntityRequest(callback: ((T) -> Unit)): Disposable {
         val disposable = mObservable2!!.subscribe({ bean ->
             callback.invoke(bean)
         }, { t ->
-            mListener?.let {
-                var handle:ExceptionHandle? = RxHttp.getRequestSetting()?.getExceptionHandle()
-                if(handle == null){
-                    handle = ExceptionHandle(t)
-                }
-                 // 无法获取实体，建议直接返回字符串
-                if(t is HttpException){
-                    if(RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == true){
-                        try {
-                            val errorMsg = t.response()?.errorBody()?.string()
-                            val result = Gson().fromJson<T>(errorMsg,object :TypeToken<T>(){}.type)
-                            callback.invoke(result)
-                        } catch (e: Exception) {
-                            mListener?.onError(handle)
-                            return@let
-                        }
-
-
+            val handle: ExceptionHandle =
+                RxHttp.getRequestSetting()?.getExceptionHandle(t) ?: ExceptionHandle(t)
+            // 无法获取实体，建议直接返回字符串
+            if (t is HttpException) {
+                if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
+                    try {
+                        val errorMsg = t.response()?.errorBody()?.string()
+                        val result = Gson().fromJson<T>(errorMsg, object : TypeToken<T>() {}.type)
+                        callback.invoke(result)
+                    } catch (e: Exception) {
+                        mListener?.onError(handle)
                     }
+                } else {
+                    mListener?.onFinish()
                 }
+            } else
                 mListener?.onError(handle)
-            }
-            mListener?.onFinish()
         }, {
             mListener?.onFinish()
         },
             {
-                mListener?.onStart() })
+                mListener?.onStart()
+            })
         mRxLife?.add(disposable)
         return disposable
     }
@@ -220,12 +242,10 @@ class RxRequest<T, E> where E : BaseResponse<T> {
 }
 
 
-
 interface ResultCallback<E> {
     fun onSuccess(code: Int, data: E?)
     fun onFailed(code: Int, msg: String?)
 }
-
 
 
 interface RequestListener {

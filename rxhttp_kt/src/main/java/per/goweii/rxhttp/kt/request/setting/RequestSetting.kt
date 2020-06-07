@@ -91,27 +91,27 @@ interface RequestSetting {
 
     fun getDynamicHeaderParameter(): Map<String, ParameterGetter>
 
-    fun <E : ExceptionHandle> getExceptionHandle(): E?
+    fun <E : ExceptionHandle> getExceptionHandle(t:Throwable): E?
 
 
     fun getInterceptors(): Array<Interceptor>
 
 
     fun getNetworkInterceptors(): Array<Interceptor>
-
-    /**
-     * 忽略HTTPS的证书验证
-     * 仅在后台未正确配置且着急调试时可临时置为true
-     *
-     * @return 建议为false
-     */
-    fun ignoreSslForHttps(): Boolean
-
-    /**
-     * android4.4及以下版本默认未开启Tls1.2
-     * 返回true则强制开启
-     */
-    fun enableTls12BelowAndroidKitkat(): Boolean
+//
+//    /**
+//     * 忽略HTTPS的证书验证
+//     * 仅在后台未正确配置且着急调试时可临时置为true
+//     *
+//     * @return 建议为false
+//     */
+//    fun ignoreSslForHttps(): Boolean
+//
+//    /**
+//     * android4.4及以下版本默认未开启Tls1.2
+//     * 返回true则强制开启
+//     */
+//    fun enableTls12BelowAndroidKitkat(): Boolean
 
     /**
      * 在创建OkHttpClient之前调用，及框架完成所有配置后

@@ -35,7 +35,7 @@ abstract class DefaultRequestSetting : RequestSetting{
     }
 
     override fun getTimeout(): Long {
-        return 5000
+        return 1000*10
     }
 
     override fun getConnectTimeout(): Long {
@@ -74,7 +74,7 @@ abstract class DefaultRequestSetting : RequestSetting{
         return HashMap()
     }
 
-    override fun <E : ExceptionHandle> getExceptionHandle(): E? {
+    override fun <E : ExceptionHandle> getExceptionHandle(t:Throwable): E? {
         return null
     }
 
@@ -86,13 +86,13 @@ abstract class DefaultRequestSetting : RequestSetting{
         return arrayOf()
     }
 
-    override fun ignoreSslForHttps(): Boolean {
-        return false
-    }
-
-    override fun enableTls12BelowAndroidKitkat(): Boolean {
-        return true
-    }
+//    override fun ignoreSslForHttps(): Boolean {
+//        return false
+//    }
+//
+//    override fun enableTls12BelowAndroidKitkat(): Boolean {
+//        return true
+//    }
 
     override fun setOkHttpClient(builder: OkHttpClient.Builder) {
 
