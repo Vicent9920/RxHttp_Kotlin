@@ -1,28 +1,17 @@
 # RxHttp_Kotlin
 
-对RxJava2+Retrofit2+OkHttp3的封装，优雅实现接口请求和文件下载（根据Java版本修改）
+之前在`GitHub`上面看见一个不错的网络请求库，功能比较完善，代码也比较简洁，于是我自动把该项目转成了`Kotlin`，并且在使用过程中进行了一些功能完善，后来自己在使用过程中依然遇到很多问题，后来再次查看代码，于是有了本文“说明书”。
 
-[GitHub主页](https://github.com/Vicent9920)
+本文目录：
+ * 项目介绍
+ * 添加依赖
+ * 使用步骤
+ * 异常反馈
+ * 鸣谢
 
-[Demo下载](https://github.com/Vicent9920/RxHttp_Kotlin/raw/master/app/release/app-release.apk)
-
-[Java版本](https://github.com/goweii/RxHttp)
-
-## 添加依赖 ##
-
- 添加`jitpack`仓库依赖
- 
-```
-maven { url 'https://jitpack.io' }
-```
-添加依赖
-
-```
-implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.9'
-```
-
-# 一、功能简介
-
+## 项目介绍
+该项目使用`RxJava`+`Retrofit`+`OkHttp3`进行封装，实现接口请求和文件下载功能。在使用开发过程中，也有研究`Kotlin.coroutines`知识和`OkGo`、`okhttp-RxHttp`等框架源码，后来觉得还是目前这个框架使用起来更顺手。当然，这个库也有一些不完善的地方，希望大家提出，我们一起学习成长！各位也可以跳过本文，直接看源码 [传送门](https://github.com/Vicent9920/RxHttp_Kotlin)
+### 功能简介
 - 网络请求（`RxRequest`）
   - 支持监听请求声明周期，如开始结束和网络错误
   - 支持多`BaseUrl`，可针对不同请求重定向
@@ -41,112 +30,140 @@ implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.9'
   - 支持在仅保存下载路径未保存进度时自动恢复断点续传
   - 支持自动获取真实文件名
 
+  ### 已集成框架
 
+```
+// Retrofit2
+api 'com.squareup.retrofit2:retrofit:2.7.1'
+api 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
+api 'com.squareup.retrofit2:converter-gson:2.7.1'
 
+// OkHttp
+api 'com.squareup.okhttp3:logging-interceptor:4.3.0'
+api 'com.squareup.okhttp3:okhttp:4.7.2'
+api 'com.squareup.okio:okio:2.6.0'
 
-# 二、发起请求之`RxRequest`
+// RxJava2
+api 'io.reactivex.rxjava2:rxjava:2.2.13'
+api 'io.reactivex.rxjava2:rxandroid:2.1.1'
+```
 
+### `Gradle`依赖
+添加`jitpack`仓库依赖
+
+```
+maven { url 'https://jitpack.io' }
+```
+添加依赖
+
+```
+implementation 'com.github.Vicent9920:RxHttp_Kotlin:1.0.9'
+```
 ## 使用说明
-
-### 一、初始化
-
-1. 在`Application`或者引导页初始化
+### 网络请求
+#### 1、初始化
 
 ```
 RxHttp.mAppContext = applicationContext
+// 下个版本修改为RxHttp.init(application)
 ```
-
-2. 初始化网络请求配置类继承`RequestSetting`或`DefaultRequestSetting`，并复写部分方法。
+#### 2、设置配置信息
 
 ```
 RxHttp.initRequest(object : DefaultRequestSetting() {
-            // baseUrl 设置
-            override fun getBaseUrl(): String {
-                return FreeApi.Config.BASE_URL
-            }
+        // baseUrl 设置
+        override fun getBaseUrl(): String {
+            return "https://wanandroid.com/"
+        }
 
-            // Code 判断
-            override fun getSuccessCode(): Int {
-                return FreeApi.Code.SUCCESS
-            }
 
-             /**
-             * 根据后端返回的错误进行处理
-             * （标准模式下有效，因为自定义实体请求无失败回调，但是可以通过网络生命周期的异常回调来处理）
-             * 未处理的返回false，会进入请求失败的回调
-             * 返回true 意味着消费当前事件，不会进入请求成功或者失败的回调
-             */
-            override fun getMultiHttpCode(): (code: Int) -> Boolean {
-                return {
-                    when(it){
-                        404 -> {
-                            true
-                        }
-                        500 -> {
-                            true
-                        }
-                        else -> false
-                    }
-                }
-            }
-
-            // 重定向地址设置
-            override fun getRedirectBaseUrl(): Map<String, String> {
-                val urls: MutableMap<String, String> =
-                    HashMap(1)
-                urls[FreeApi.Config.BASE_URL_OTHER_NAME] = FreeApi.Config.BASE_URL_OTHER
-                return urls
-            }
-
-            // 公共参数设置
-            override fun getStaticHeaderParameter(): Map<String, String> {
-//                val parameters: MutableMap<String, String> =
-//                    HashMap(3)
-//                parameters["system"] = "android"
-//                parameters["version_code"] = "1"
-//                parameters["device_num"] = "666"
-//                return parameters
-                return super.getStaticHeaderParameter()
-            }
-
-            // 设置动态参数
-            override fun getDynamicHeaderParameter(): Map<String, ParameterGetter> {
-//                val parameters: HashMap<String, ParameterGetter> =
-//                    HashMap()
-//                val value = object :ParameterGetter{
-//                    override fun get(): String {
-//                        return "9527"
-//                    }
-//                }
-//                parameters["id"] = value
-//                return parameters
-                return super.getDynamicHeaderParameter()
-            }
-
-            override fun setOkHttpClient(builder: OkHttpClient.Builder) {
-                builder.hostnameVerifier { hostname, session ->
-                    // 验证主机名是否与服务器的身份验证方案匹配。
-                    true
-                }
-//                super.setOkHttpClient(builder)
-            }
-        })
+        // Code 判断
+        override fun getSuccessCode(): Int {
+            return 200
+        }
+}
 ```
+#### 3、请求接口
 
-
-
-### 二、使用示例
-
-#### 网络请求返回实体
-`value` :  返回字段名称
-`alternate` : 备用字段名称
 ```
-open class ResponseBean<T>: BaseResponse<T> {
+// 接口设置
+object FreeApi: Api() {
+
+    interface Service {
+        /**
+         * 微信公众号列表
+         */
+        @GET("wxarticle/chapters/json")
+        fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
+    }
+
+    fun api(): Service {
+        return api(Service::class.java)
+    }
+
+}
+...
+RxHttp.request(FreeApi.api().getCelebrities())
+    .request(object : ResultCallback<List<Celebrity>> {
+        override fun onSuccess(code: Int, data: List<Celebrity>?) {
+            val msg = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
+			Log.e("request",msg)
+        }
+
+        @SuppressLint("SetTextI18n")
+        override fun onFailed(code: Int, msg: String?) {
+            val msg = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
+			Log.e("request",msg)
+        }
+    })
+```
+### 个性化设置
+
+#### 请求接口返回对象自定义处理
+其实这个标题描述不是很准确，标准的返回数据结构要求继承自一个抽象类，如下：
+
+```
+/**
+ * <p>文件描述：网络接口返回json格式对应的实体类<p>
+ * <p>@author 烤鱼<p>
+ * <p>@date 2019/12/30 0030 <p>
+ * <p>@update 2019/12/30 0030<p>
+ * <p>版本号：1<p>
+ *
+ */
+abstract class BaseResponse<T>{
+
+    abstract fun getCode(): Int
+
+    abstract fun setCode(code: Int)
+
+    abstract fun getData(): T?
+
+    abstract fun setData(data: T?)
+
+    abstract fun getMsg(): String?
+
+    abstract fun setMsg(msg: String?)
+
+}
+```
+自定义返回的数据结构，可以同时对一个属性解析的时候使用不同的命名，我们继续看示例，重点关注`SerializedName`注解
+
+```
+/**
+ * <p>文件描述：网络请求返回实体<p>
+ * <p>@author 烤鱼<p>
+ * <p>@date 2020/1/1 0001 <p>
+ * <p>@update 2020/1/1 0001<p>
+ * <p>版本号：1<p>
+ *
+ */
+open class ResponseBean<T>: BaseResponse<T>() {
     @SerializedName(value = "code", alternate = ["status"])
     private var code = 0
     @SerializedName(value = "data", alternate = ["result"])
     private var data: T? = null
-    @SerializedName(value = "msg", alternate = ["message"])
+    @SerializedName(value = "errorMsg", alternate = ["message"])
     private var message: String? = null
     override fun getCode(): Int {
         return this.code
@@ -175,500 +192,640 @@ open class ResponseBean<T>: BaseResponse<T> {
 
 }
 ```
-
-
-#### 服务端常量配置
+我们一般使用`data`、`code`、`msg`来做基本的数据结构，但是这几个字段可以通过`SerializedName`注解来实现属性重命名，如示例。接下来再说一下我们平时请求的问题：
+* 标准数据结构
+这个很好理解，就是返回的数据类型是上面`ResponseBean<Any>`类型，返回成功的时候也是根据我们配置的来。示例如下：
 
 ```
-object FreeApi: Api() {
-
-    interface Code {
-        companion object {
-            const val SUCCESS = 0
+interface Service {
+    ...
+    /**
+     * 微信公众号列表
+     */
+    @GET("wxarticle/chapters/json")
+    fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
+}
+使用：
+RxHttp.request(FreeApi.api().getCelebrities())
+    .request(object : ResultCallback<List<Celebrity>> {
+        @SuppressLint("SetTextI18n")
+        override fun onSuccess(code: Int, data: List<Celebrity>?) {
+            // TODO 刷新页面
         }
-    }
 
-    interface Config {
-        companion object {
-            const val BASE_URL = "https://www.wanandroid.com/"
-            const val BASE_URL_OTHER_NAME = "other"
-            const val BASE_URL_OTHER = "https://v1.jinrishici.com/"
+        @SuppressLint("SetTextI18n")
+        override fun onFailed(code: Int, msg: String?) {
+            // TODO 提示错误
         }
-    }
+    })
+```
+* 标准数据结构，但成功的时候返回的不是统一的`successCode`
 
-    interface Service {
-        /**
-         * 微信公众号列表
-         */
-        @Headers(Header.CACHE_ALIVE_SECOND + ":" + 10)
-        @GET("wxarticle/chapters/json")
-        fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
+这个时候我们期望可以直接在这里处理，而不是配置通过`getMultiSuccessCode`（后面有介绍）方法，示例如下：
 
-        /**
-         * banner内容
-         */
-        @Headers(Header.CACHE_ALIVE_SECOND + ":" + 0)
-        @GET("banner/json")
-        fun getBannerList(): Observable<ResponseBean<List<Banner>>>
+```
+RxHttp.request(FreeApi.api().uploadImg(map)).customRequest { result:ResponseBean<List<Celebrity> ->
+    // 连ResponseBean一起返回
+}
+```
+* 其它类型的数据结构
+如果我们项目里面有一些不同平台提供的接口，这个时候不仅`successCode`不一样了，甚至连数据结构都不一样了，这个时候又应该如何处理呢？和上面类似，示例如下：
 
-        /**
-         * 注册账号
-         */
-        @POST("user/register")
-        @FormUrlEncoded
-        fun register(@Field("username") username: String,
-                     @Field("password")password:String,
-                     @Field("repassword")repassword:String): Observable<ResponseBean<RegisterBean>>
-
-        /**
-         * 重定向
-         * 相当于修改了BaseUrl
-         */
-        @Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
-        @GET("all.json")
-        fun singlePoetry(): Observable<SinglePoetryBean>
-
-        /**
-         * http 请求 // http://www.mxnzp.com/api/holiday/single/20200102
-         */
-        @GET
-        fun getDate(@Url path: String): Observable<ResponseBean<DateData>>
-    }
-
-    fun api(): Service {
-        return api(Service::class.java)
-    }
-
+```
+ interface Service {
+    ...
+    /**
+	 * 获取诗词
+	 */
+	@Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
+	@GET("all.json")
+	fun singlePoetry(): Observable<SinglePoetryBean>
+}
+...
+RxHttp.customRequest(FreeApi.api().singlePoetry()).customEntityRequest {result:SinglePoetryBean ->
+	// 自行判断数据
 }
 ```
 
-#### 常规请求
+
+#### 打开网络日志
+使用的是`okhttp3.logging.HttpLoggingInterceptor`,默认日志级别为`HttpLoggingInterceptor.Level.BODY`，使用方式如下：
+
 ```
-// 请求生命周期接口回调
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    // 下个版本支持修改日志级别
+    override fun isDebug(): Pair<Boolean, HttpLoggingInterceptor.Level> {
+        return Pair(true,HttpLoggingInterceptor.Level.NONE)
+    }
+}
+```
+#### 自定义`Gson`
+示例如下：
+
+```
+/**
+ * JSON中时间格式转换，消除后台返回时间格式不定引发的转换问题
+ */
+@SuppressLint("SimpleDateFormat")
+class DateDeserializer : JsonDeserializer<Date> {
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Date? {
+        return try {
+            // 年月日 时分秒格式
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(json.asJsonPrimitive.asString, ParsePosition(0))
+        } catch (e: Exception) {
+            // 毫秒数格式
+            Date(json.asJsonPrimitive.asLong)
+        }
+    }
+}
+...
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getGson(): Gson? {
+		val builder = GsonBuilder()
+		builder.registerTypeAdapter(Date::class.java, DateDeserializer()).setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+		builder.registerTypeAdapter(Date::class.java, DateSerializer()).setDateFormat("yyyy-MM-dd HH:mm:ss").create()
+		return builder.create()
+	}
+}
+```
+#### 设置`OkHttpClient`
+
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun setOkHttpClient(builder: OkHttpClient.Builder) {
+
+	}
+}
+```
+#### 自定义`Interceptor`
+拦截器分为两个模块，一个是缓存相关，一个是网络相关。当然，你直接一骨碌写在一起也没有问题！网络拦截器（`NetworkInterceptor`）应用于日志打印、刷新`Token`等；缓存策略主要是自定义缓存策略，比如无网获取历史记录之类。每个模块的拦截也支持多个，具体见示例。
+
+**网络拦截器示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getNetworkInterceptors(): Array<Interceptor> {
+    	return arrayOf()
+    }
+}
+```
+**缓存策略拦截器示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getInterceptors(): Array<Interceptor> {
+    	return arrayOf()
+    }
+}
+```
+
+#### 自定义请求异常工具类
+默认异常工具类如下,支持重写自定义
+```
+const val UNKNOWN = -1
+const val NET = 0
+const val TIMEOUT = 1
+const val JSON = 2
+const val HTTP = 3
+const val HOST = 4
+const val SSL = 5
+
+open class ExceptionHandle constructor(val e: Throwable) {
+
+    val code: Int by lazy {
+        onGetCode(e)
+    }
+    val msg: String by lazy {
+        onGetMsg(code)
+    }
+
+    /**
+     * 重写该方法去返回异常对应的错误码
+     *
+     * @param e Throwable
+     * @return 错误码
+     */
+    private fun onGetCode(e: Throwable?): Int {
+        return if (!NetUtils.isConnected()) {
+            NET
+        } else {
+            if (e is SocketTimeoutException) {
+                TIMEOUT
+            } else if (e is HttpException) {
+                HTTP
+            } else if (e is UnknownHostException || e is ConnectException) {
+                HOST
+            } else if (e is JsonParseException || e is ParseException || e is JSONException) {
+                JSON
+            } else if (e is SSLException) {
+                SSL
+            } else {
+                UNKNOWN
+            }
+        }
+    }
+
+    /**
+     * 重写该方法去返回错误码对应的错误信息
+     *
+     * @param code 错误码
+     * @return 错误信息
+     */
+    private fun onGetMsg(code: Int): String {
+        return when (code) {
+            NET -> "网络连接失败，请检查网络设置"
+            TIMEOUT -> "网络状况不稳定，请稍后重试"
+            JSON -> "JSON解析异常"
+            HTTP -> "请求错误，请稍后重试"
+            HOST -> "服务器连接失败，请检查网络设置"
+            SSL -> "证书验证失败"
+            else -> "未知错误，请稍后重试"
+        }
+    }
+
+}
+...
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun <E : ExceptionHandle> getExceptionHandle(): E? {
+        return super.getExceptionHandle()
+    }
+}
+```
+#### 设置公共`Header`
+公共即每个请求均需携带该`Header`，这种情况分为静态值和动态值，**静态，即`Header value`无变化；动态，即`Header value`有变化**。公共`Header`默认为空的`HashMap`
+
+**静态公共`Header`示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getStaticHeaderParameter(): Map<String, String> {
+        val parameters: MutableMap<String, String> =
+            HashMap(3)
+        parameters["system"] = "android"
+        parameters["version_code"] = "1"
+        parameters["device_num"] = "666"
+        return parameters
+    }
+}
+```
+**动态公共`Header`示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getDynamicHeaderParameter(): Map<String, ParameterGetter> {
+        val parameters: HashMap<String, ParameterGetter> =
+            HashMap(1)
+        val value = object :ParameterGetter{
+            override fun get(): String {
+                if(登录){
+                    return "登录ID 9527"
+                }else{
+                    return ""
+                }
+
+            }
+        }
+        parameters["id"] = value
+        return parameters
+    }
+}
+```
+#### 设置公共`Param`
+不知道大家有没有遇到这种情况，即每个接口在参数上要求携带手机的厂商、系统、版本号？我以前遇到过，这个接口就是针对这种情况进行的封装，与上面相似，也分为静态参数和动态参数
+
+**静态公共参数示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getStaticPublicQueryParameter(): Map<String, String> {
+        val parameters: MutableMap<String, String> =
+            HashMap(3)
+        parameters["system"] = "android"
+        parameters["version_code"] = "1"
+        parameters["device_num"] = "666"
+        return parameters
+    }
+}
+```
+**动态公共参数示例**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getDynamicHeaderParameter(): Map<String, ParameterGetter> {
+        val parameters: HashMap<String, ParameterGetter> =
+            HashMap(1)
+        val value = object :ParameterGetter{
+            override fun get(): String {
+                if(登录){
+                    return "登录ID 9527"
+                }else{
+                    return ""
+                }
+
+            }
+        }
+        parameters["id"] = value
+        return parameters
+    }
+}
+```
+
+#### 自定义缓存相关
+* 自定义缓存大小
+
+如果支持缓存的话，文件大小默认为`10*1024*1024`,当然你可以修改为自己想要的大小，如下
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getCacheSize(): Long {
+        return 1024*1024*1024
+    }
+}
+```
+* 自定义缓存文件名称
+
+除此以外，你还可以修改应用缓存区的缓存文件名称，其默认为“`rxhttp_cache`”,修改如下
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+     override fun getCacheDirName(): String {
+        return "Vincent"
+    }
+}
+```
+* 自定义缓存时间
+对于某个接口，你期望直接获取`3`秒以内的数据，否则还是请求网络，这个也是可以的，只需要在接口的地方增加一个`Header`就行(因为此处是通过`Header`设置`Cache-Control:max-age`来实现)
+
+```
+/**
+ * 微信公众号列表
+ */
+@Headers(Header.CACHE_ALIVE_SECOND + ":" + 3)
+@GET("wxarticle/chapters/json")
+fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
+```
+
+#### 自定义请求相关时间
+请求的时间有三个指标，如下
+* 连接时间
+* 读时间
+* 写时间
+上面这些时间`okhttp3`默认是均`10`秒，框架默认也是`10`秒，当然你也可以修改，修改的时间为毫秒值。
+
+**一个方法修改三个时间**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getTimeout(): Long {
+        return 60*1000
+    }
+}
+```
+**单独修改连接超时时间**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getConnectTimeout(): Long {
+        return 50*1000
+    }
+}
+```
+**单独修改读取超时时间**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getReadTimeout(): Long {
+        return 40*1000
+    }
+}
+```
+**单独修改写入超时时间**
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getWriteTimeout(): Long {
+        return 30*1000
+    }
+}
+```
+#### 返回码设置
+正常情况下，接口返回的时候`code`一般用`200`代表成功，我们初始化的时候通过`getSuccessCode`方法就设置好了。但是如果我们有多个代表成功的code，这个时候我们也可以通过一个数组来表示（好像一般情况下用不到）。还有一种情况，如果请求失败了，我们需要针对某个特定的code来获取ErrorBody的内容，这个时候还可以使用`getMultiHttpCode`方法来处理。
+说起来比较麻烦，我们来看示例：
+
+**默认成功返回码**
+
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getSuccessCode(): Int {
+        return 200
+    }
+}
+```
+
+**兼容其他成功返回码**
+
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getMultiSuccessCode(): IntArray {
+       // return intArrayOf()默认值空数组
+       return intArrayOf(0) // 当请求的Bean返回码等于200或者0，都将回调访问成功的方法
+    }
+}
+```
+**`Http` 状态码处理**
+
+此处为请求失败，根据状态码处理不同业务，如果返回true，则代表消费当次异常，不会走异常回调（但是会尝试回调请求结束的生命周期方法，如果你有监听的话），否则会回调请求失败的方法。
+```
+override fun getMultiHttpCode(): (code: Int) -> Boolean {
+    return {
+            when(it){
+                407 -> {
+                    //TODO 刷新Token
+                    true
+                }
+                409 -> {
+                    //TODO 强制下线
+                    true
+                }
+                else -> false
+            }
+        }
+}
+```
+#### **`baseUrl`设置**
+**`BaseUrl`默认是全局只有一个**，但是如果你使用组件化开发的话，每个模块的`BaseUrl`可能都不一样，这个时候就需要**支持多个`BaseUrl`**。当然，你说你只有一个组件，但是你也需要设置多个BaseUrl，这个时候我们**提供了重定向方法**，就是把需要重定向的地址配置好，请求的时候携带特定的`Header`就会去切换相应的`BaseUrl`。另外，开发过程中有测试环境和开发环境的切换，这个框架也支持动态的切换默认的`BaseUrl`，具体设置见下面示例。
+* 默认全局`BaseUrl`
+
+```
+RxHttp.initRequest(object : DefaultRequestSetting() {
+    ...
+    override fun getBaseUrl(): String {
+        return "https://wanandroid.com/"
+    }
+}
+```
+* 多个`BaseUrl`（使用`class`为`key`）
+
+```
+ override fun getServiceBaseUrl(): Map<Class<*>, String> {
+    val map = HashMap<Class<*>, String>(2).apply {
+        this[Class.forName("com.vincent.sample.rxhttp_kotlin.net.MyService")] = "https://www.baidu.com"
+        this[Class.forName("com.vincent.sample.rxhttp_kotlin.net.YourService")] = "http://www.baidu.com"
+    }
+    return map
+}
+```
+* 请求地址重定向
+
+```
+ override fun getServiceBaseUrl(): Map<Class<*>, String> {
+    ...
+    // 重定向地址设置
+    override fun getRedirectBaseUrl(): Map<String, String> {
+        val urls: MutableMap<String, String> = HashMap(1)
+        urls[FreeApi.Config.BASE_URL_OTHER_NAME] = FreeApi.Config.BASE_URL_OTHER
+        return urls
+    }
+}
+...
+interface Service {
+...
+    /**
+     * 重定向
+     * 相当于修改了BaseUrl
+     */
+    @Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
+    @GET("all.json")
+    fun singlePoetry(): Observable<SinglePoetryBean>
+}
+
+```
+上面这个示例的请求地址将从`https://www.wanandroid.com/all.json`转移到`https://v1.jinrishici.com/`了。
+
+> - ![](https://user-gold-cdn.xitu.io/2020/6/7/1728de1248ad7faa?w=534&h=505&f=png&s=31750)
+* 开发时动态切换`BaseUrl`
+
+```
+RequestClientManager.refreshBaseUrl("http://www.google.com/")
+```
+
+#### 请求生命周期监听
+监听网络请求开始/错误/结束，错误或者结束只会调用其中一个，示例如下：
+
+```
 private val reqListener = object : RequestListener {
+        private var timeStart: Long = 0
+        @SuppressLint("SetTextI18n")
         override fun onStart() {
-           // 开始网络请求
+            // TODO 开启弹窗
         }
 
         override fun onError(handle: ExceptionHandle?) {
-            // 网络请求错误
+            // TODO 遇到错误，关闭弹窗并提示错误信息
         }
 
         override fun onFinish() {
-            // 网络请求结束
+            // TODO 请求结束 关闭弹窗
         }
-  }
-    
-  // 生命周期绑定 防止内存泄露
- private val mRxLife: RxLife by lazy {
-        RxLife.create()
-   }
-   
-   // 获取公众号列表
-mRxLife.add(
-                RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
-                .request(object : ResultCallback<List<Celebrity>> {
-                    // 请求成功
-                    override fun onSuccess(code: Int, data: List<Celebrity>?) {
-                        
-                    }
-
-                    // 请求成功，但是返回失败（根据SuccessCode判断）
-                    override fun onFailed(code: Int, msg: String?) {
-                       
-                    }
-                })
-            )
-    
-// 注册
-mRxLife.add(
-    RxHttp.request(
-    FreeApi.api().register(
-        et_userName.text.toString(),
-        et_password.text.toString(),
-        et_password.text.toString()
-    )
-).listener(reqListener)
-    .request(object : ResultCallback<RegisterBean> {
-        // 请求成功
-        override fun onSuccess(code: Int, data: RegisterBean?) {
-           
-        }
-        // 请求成功，但是返回失败（根据SuccessCode判断）
-        override fun onFailed(code: Int, msg: String?) {
-           
-        }
-    })
-)
-```
-#### 非默认`SuccessCode`的请求
-```
-mRxLife.add(
-            RxHttp.request(FreeApi.api()
-            .getDate("http://www.mxnzp.com/api/holiday/single/${getCurrent()}"))
-            .listener(reqListener)
-            .customRequest {
-                // 网络请求访问成功
-                if(it.getCode() == 1){ // 上面网络请求配置默认SuccessCode为200
-                   // 接口访问成功 有预期内容
-                }else{
-                    // 接口返回失败 无预期内容
-                }
-            })
-
-```
-#### 非默认`ResponseBean`的请求
-> 即返回类型并非`ResponseBean<T>`的请求结果
-```
-
-/**
- * 重定向
- * 相当于修改了BaseUrl,请求地址为 Config.BASE_URL_OTHER_NAME+all.json
- */
-@Headers(Header.BASE_URL_REDIRECT + ":" + Config.BASE_URL_OTHER_NAME)
-@GET("all.json")
-fun singlePoetry(): Observable<SinglePoetryBean>
-
-mRxLife.add(RxHttp.customRequest(FreeApi.api().singlePoetry())
-            .listener(reqListener).customEntityRequest {
-                // 请求成功 返回的是SinglePoetryBean
-        })
-```
-
-## `API`
-
-### `JsonObjUtils`
-
-> 创建JSONObject对象并生成Json字符串。
-
-### `RequestBodyUtils`
-
-> 创建`RequestBody`，针对`POST`请求。
-
-如图片上传接口
-
-```
-/**
-   * 键		值
-   * img		File
-   * content	String
-   */
-  @Multipart
-  @POST("public/img")
-  fun uploadImg(@PartMap img: Map<String, RequestBody>): Observable<ResponseBean<UploadImgBean>>
-```
-
-发起请求如下
-
-```
-private fun uploadImg(content: String, imgFile: File) {
-        val map = builder()
-            .add<Any>("content", content)
-            .add<Any>("img", imgFile)
-            .build()
-        mRxLife.add(
-            RxHttp.request(FreeApi.api().uploadImg(map)).listener(reqListener)
-                .request(object : ResultCallback<UploadImgBean> {
-                    @SuppressLint("SetTextI18n")
-                    override fun onSuccess(code: Int, data: UploadImgBean?) {
-                        tv_log.text =
-                            "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                    }
-
-                    @SuppressLint("SetTextI18n")
-                    override fun onFailed(code: Int, msg: String?) {
-                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
-                    }
-                })
-        )
     }
 ```
-
-### `HttpsCompat`
-
-主要提供7个静态方法，用于实现证书忽略和开启`Android4.4`及以下对`TLS1.2`的支持。
+既然是生命周期，那一定也得有页面生命周期的监听，示例如下：
 
 ```
-/**
- * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
- */
-fun ignoreSSLForOkHttp(OkHttpClient.Builder,X509TrustManager) 
-    
-/**
- * 开启HttpsURLConnection对TLS1.2的支持
- */
-fun enableTls12ForOkHttp( OkHttpClient.Builder,X509TrustManager)
-    
-/**
- * 忽略证书的验证，这样请求就和HTTP一样，失去了安全保障，不建议使用
- * 应在使用HttpsURLConnection之前调用，建议在application中
- */
-fun ignoreSSLForHttpsURLConnection() 
-    
-/**
- * 开启HttpsURLConnection对TLS1.2的支持
- * 应在使用HttpsURLConnection之前调用，建议在application中
- */
-fun enableTls12ForHttpsURLConnection()
-    
-/**
- * 获取开启TLS1.2的SSLSocketFactory
- * 建议在android4.4及以下版本调用
- */
-fun getEnableTls12SSLSocketFactory(): SSLSocketFactory?
-    
-/**
- * 获取忽略证书的HostnameVerifier
- * 与{@link #getIgnoreSSLSocketFactory()}同时配置使用
- */
-fun getIgnoreHostnameVerifier(): HostnameVerifier?
-    
-/**
- * 获取忽略证书的SSLSocketFactory
- * 与{@link #getIgnoreHostnameVerifier()}同时配置使用
- */
-fun getIgnoreSSLSocketFactory(): SSLSocketFactory? 
-```
+open class BaseViewModel:ViewModel(),RxLife {
+     val mCompositeDisposable = CompositeDisposable()
+	 override fun destroy() {
+        if (mCompositeDisposable.isDisposed) return
+        mCompositeDisposable.dispose()
+    }
 
-
-
-## 常见问题
-
-### 在`Android9.0`及以上系统`HTTP`请求无响应
-
-官方资料在框架安全性变更提及，如果应用以 `Android 9 `或更高版本为目标平台则默认情况下启用网络传输层安全协议 (TLS)，即 `isCleartextTrafficPermitted()` 函数返回 `false`。 如果您的应用需要为特定域名启用明文，您必须在应用的网络安全性配置中针对这些域名将 `cleartextTrafficPermitted` 显式设置为` true`。
-
-因此解决办法有2种：
-
-第一种，启用`HTTP`，允许明文传输（不建议采用）
-1. 在资源文件夹`res/xml`下面创建`network_config.xml`（资源文件已创建）
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
-</network-security-config>
-```
-
-2. 在清单文件`AndroidManifest.xml的application`标签里面设置`networkSecurityConfig`属性引用。
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<manifest ... >
-    <application
-        android:networkSecurityConfig="@xml/network_security_config">
-    </application>
-</manifest>
-```
-
-第二种，所有接口采用`HTTPS`协议（建议采用）
-
-此方法需确保后台正确配置，如配置后仍有无法访问，且提示证书异常，请检查后台配置。
-
-### `HTTPS`请求访问时提示证书异常
-
-该情况一般为后台未正确配置证书。请检查后台配置。
-
-在测试时，我们可以暂时选择忽略证书，这样请求就和`HTTP`一样，但会失去安全保障，不允许在正式发布时使用。
-
-**可直接使用`HttpsCompat`工具类。**
-
-实现代码如下：
-
-```java
-public static void ignoreSSLForOkHttp(OkHttpClient.Builder builder) {
-    builder.hostnameVerifier(getIgnoreHostnameVerifier())
-            .sslSocketFactory(getIgnoreSSLSocketFactory());
-}
-
-public static void ignoreSSLForHttpsURLConnection() {
-    HttpsURLConnection.setDefaultHostnameVerifier(getIgnoreHostnameVerifier());
-    HttpsURLConnection.setDefaultSSLSocketFactory(getIgnoreSSLSocketFactory());
-}
-
-/**
- * 获取忽略证书的HostnameVerifier
- * 与{@link #getIgnoreSSLSocketFactory()}同时配置使用
- */
-private static HostnameVerifier getIgnoreHostnameVerifier() {
-    return new HostnameVerifier() {
-        @Override
-        public boolean verify(String s, SSLSession sslSession) {
-            return true;
-        }
-    };
-}
-
-/**
- * 获取忽略证书的SSLSocketFactory
- * 与{@link #getIgnoreHostnameVerifier()}同时配置使用
- */
-private static SSLSocketFactory getIgnoreSSLSocketFactory() {
-    try {
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, getTrustManager(), new SecureRandom());
-        return sslContext.getSocketFactory();
-    } catch (Exception e) {
-        throw new RuntimeException(e);
+    override fun add(d: Disposable) {
+        mCompositeDisposable.add(d)
+    }
+    override fun onCleared() {
+        super.onCleared()
+        mCompositeDisposable.dispose()
     }
 }
+...
+class LoginViewModel : BaseViewModel() {
 
-private static TrustManager[] getTrustManager() {
-    return new TrustManager[]{
-        new X509TrustManager() {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+    fun login(userName: String, password: String) {
+        RxHttp.autoLife(this).customRequest(
+                FreeApi.api().login(userName,password)).customEntityRequest {
+                // TODO 处理业务逻辑
+
             }
 
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+    }
+
+}
+//或者这样
+class LoginViewModel : ViewModel(),RxLife {
+
+	val mCompositeDisposable = CompositeDisposable()
+    fun login(userName: String, password: String) {
+        val disposable = RxHttp.customRequest(
+                FreeApi.api().login(userName,password)).customEntityRequest {
+                // TODO 处理业务逻辑
+
             }
+		addDispose(disposable)
+    }
 
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[]{};
-            }
-        }
-    };
+
+    override fun add(d: Disposable) {
+        mCompositeDisposable.add(d)
+    }
+    override fun onCleared() {
+        super.onCleared()
+        if (mCompositeDisposable.isDisposed) return
+        mCompositeDisposable.dispose()
+    }
+
 }
-```
-
-### `HTTPS`请求在`Android4.4`及以下无法访问
-
-服务器已正确配置`SSL`证书，且已打开`TLS1.1`和`TLS1.2`，但是在`Android4.4`及以下无法访问网络。是因为在`Android4.4`及以下版本默认不支持`TLS1.2`，需要开启对`TLS1.2`的支持。代码如下：
-
-```java
-public static void enableTls12ForHttpsURLConnection() {
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-        SSLSocketFactory ssl = getEnableTls12SSLSocketFactory();
-        if (ssl != null) {
-            HttpsURLConnection.setDefaultSSLSocketFactory(ssl);
-        }
-    }
-}
-
-public static void enableTls12ForOkHttp(OkHttpClient.Builder builder) {
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-        SSLSocketFactory ssl = HttpsCompat.getEnableTls12SSLSocketFactory();
-        if (ssl != null) {
-            builder.sslSocketFactory(ssl);
-        }
-    }
-}
-
-public static SSLSocketFactory getEnableTls12SSLSocketFactory() {
-    try {
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, null, null);
-        return new Tls12SocketFactory(sslContext.getSocketFactory());
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return null;
-}
-
-private static class Tls12SocketFactory extends SSLSocketFactory {
-    private static final String[] TLS_SUPPORT_VERSION = {"TLSv1.1", "TLSv1.2"};
-
-    private final SSLSocketFactory delegate;
-
-    private Tls12SocketFactory(SSLSocketFactory base) {
-        this.delegate = base;
-    }
-
-    @Override
-    public String[] getDefaultCipherSuites() {
-        return delegate.getDefaultCipherSuites();
-    }
-
-    @Override
-    public String[] getSupportedCipherSuites() {
-        return delegate.getSupportedCipherSuites();
-    }
-
-    @Override
-    public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        return patch(delegate.createSocket(s, host, port, autoClose));
-    }
-
-    @Override
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-        return patch(delegate.createSocket(host, port));
-    }
-
-    @Override
-    public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
-        return patch(delegate.createSocket(host, port, localHost, localPort));
-    }
-
-    @Override
-    public Socket createSocket(InetAddress host, int port) throws IOException {
-        return patch(delegate.createSocket(host, port));
-    }
-
-    @Override
-    public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
-        return patch(delegate.createSocket(address, port, localAddress, localPort));
-    }
-
-    private Socket patch(Socket s) {
-        if (s instanceof SSLSocket) {
-            ((SSLSocket) s).setEnabledProtocols(TLS_SUPPORT_VERSION);
-        }
-        return s;
-    }
-}
-```
-
-### `Glide`在`Android4.4`及以下图片加载失败
-
-原因同上，需要自定义`Glide`的`AppGlideModule`，传入支持`TLS1.2`的`OkHttpClient`。
-
-```java
-@GlideModule
-public class CustomAppGlideModule extends AppGlideModule {
-
-    @Override
-    public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
-        registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(getOkHttpClient()));
-    }
-
-    @Override
-    public boolean isManifestParsingEnabled() {
-        return false;
-    }
-
-    private static OkHttpClient getOkHttpClient() {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        HttpsCompat.enableTls12ForOkHttp(builder);
-        return builder.build();
-    }
-}
-```
-
-
-
-# 三、文件下载之`RxDownload`
-
-## 使用方法
-
-### 初始化
-
-初始化操作可在Application中也可在应用启动页中进行
 
 ```
-RxHttp.init(this)
-// 可选，未配置设置将自动采用DefaultDownloadSetting
-// 可不设置，使用DefaultDownloadSetting
-RxHttp.initDownload(object : DefaultDownloadSetting() {
+#### 其它工具类
+
+*  `JsonObjUtils`
+帮助生成`JSON`对象，具体可以查看源码 [`JsonObjUtils`](https://github.com/Vicent9920/RxHttp_Kotlin/blob/aa50a6155dfddf200ea4321fcffbb9183eb90e61/rxhttp_kt/src/main/java/per/goweii/rxhttp/kt/request/utils/JsonObjUtils.kt)
+*  `RequestBodyUtils`
+帮助生成`RequestBody`,使用很简单，可以查看源码[`RequestBodyUtils`](https://github.com/Vicent9920/RxHttp_Kotlin/blob/03cd5d5d188d064aa451eb975afc4026c153bf02/rxhttp_kt/src/main/java/per/goweii/rxhttp/kt/request/utils/RequestBodyUtils.kt)
+*  `HttpsCompat`
+用于`Https`实现证书忽略和开启`Android4.4`及以下对`TLS1.2`的支持。具体可以查看源码[`HttpsCompat`](https://github.com/Vicent9920/RxHttp_Kotlin/blob/8f2cf4abbda6c228514ede2e88aef1cc11c09c65/rxhttp_kt/src/main/java/per/goweii/rxhttp/kt/request/utils/HttpsCompat.kt)
+
+### 文件下载
+#### 初始化
+
+```
+RxHttp.init(application)
+```
+#### 配置信息
+
+```
+RxHttp.initDownload(DefaultDownloadSetting())
+```
+上面这个`DefaultDownloadSetting`支持重写，可以设置`BaseUrl`（默认设置`http://api.rxhttp.download/`为`Retrofit`的`BaseUrl`）、连接超时、读取超时、写入超时（同网络请求一样）、存储文件地址（默认存在应用文件夹`android/data/**/files/Download/`）、下载模式（追加、替换、重命名，默认为追加）
+
+```
+RxHttp.initDownload(object :DefaultDownloadSetting(){
+    override fun getBaseUrl(): String {
+        return "https://wanandroid.com"
+    }
+
     override fun getTimeout(): Long {
-        return 60000
+        return 60*1000
+    }
+
+    override fun getSaveDirPath(): String? {
+        // 自定义保存文件路径需要自行适配Android P ,以及进行动态权限申请
+        return super.getSaveDirPath()
     }
 })
 ```
+最后说下载模式之前，得先进行说明：
 
-### 调用
+```
+/**
+ * 如果需要断点续传下载，请设置 APPEND 默认值为 APPEND
+ */
+enum class Mode {
+    /**
+     * 追加
+     * 用于断点续传下载，下载完成会直接回调完成下载
+     */
+    APPEND,
+    /**
+     * 替换
+     * 删除重新下载
+     */
+    REPLACE,
+    /**
+     * 重命名
+     * 重新下载文件，并对文件名称进行重命名
+     */
+    RENAME
+}
+```
+最后设置也是在上面这个对象里面：
 
+```
+RxHttp.initDownload(object :DefaultDownloadSetting(){
+    override fun getDefaultDownloadMode(): Mode {
+        return Mode.APPEND
+    }
+})
+```
+#### 开始下载文件
+
+
+* 创建下载任务
+
+```
+RxDownload.create(DownloadInfo(et_url.text.toString()))
+...
+data class DownloadInfo @JvmOverloads constructor(var url:String,
+  var saveDirPath:String? = null,
+  var saveFileName:String? = null,
+  var downloadLength:Long = 0L,
+  var contentLength: Long = 0)
+```
+上面这个`DownloadInfo`对象的`url`是`Retrofit`的`url`注解使用;`saveDirPath`为文件下载保存地址；`saveFileName1`保存文件名称；`downloadLength`已下载长度；`contentLength`是文件长度
+* 下载任务状态修改
+  - `RxDownload.start()` 开始下载
+  - `RxDownload.stop()` 暂停下载
+  - `RxDownload.cancel()` 取消下载
+* `DownloadListener`下载状态监听
+* `ProgressListener`下载进度更新
+* `SpeedListener`下载速度更新
 ```
 RxDownload.create(DownloadInfo(et_url.text.toString()))
     .setDownloadListener(object : DownloadListener {
@@ -722,6 +879,16 @@ RxDownload.create(DownloadInfo(et_url.text.toString()))
             }
         })
 ```
+
+
+## 异常反馈
+本人邮箱——weixing9920@163.com
+
+本人微信——904993060
+
+## 传送门 [源码](https://github.com/Vicent9920/RxHttp_Kotlin)
+
+
 
 
 
