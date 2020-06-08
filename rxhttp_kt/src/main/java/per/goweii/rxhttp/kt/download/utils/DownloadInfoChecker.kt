@@ -13,18 +13,34 @@ object DownloadInfoChecker {
 
     @Throws(SaveFileBrokenPointException::class)
     fun checkDownloadLength(info: DownloadInfo) {
-        if (info.downloadLength == 0L) {
+        if (info.downloadLength == 0L || info.downloadLength == info.contentLength) {
             val file = createFile(info.saveDirPath, info.saveFileName)
             if (file != null && file.exists()) {
-                if (info.mode == Mode.APPEND) {
-                    info.downloadLength = file.length()
-                } else if (info.mode == Mode.REPLACE) {
-                    file.delete()
-                } else {
-                    info.saveFileName = renameFileName(info.saveFileName)
+                when (info.mode) {
+                    Mode.APPEND -> {
+                        if(info.downloadLength == 0L){
+                            info.downloadLength = file.length()
+                        }else{
+                            info.downloadLength = info.contentLength-1
+                        }
+
+                    }
+                    Mode.REPLACE -> {
+                        file.delete()
+                        info.downloadLength = 0
+                        info.contentLength = 0
+                    }
+                    else -> {
+                        info.saveFileName = renameFileName(info.saveFileName)
+                        if(info.downloadLength == 0L){
+                            info.downloadLength = file.length()
+                        }else{
+                            info.downloadLength = info.contentLength-1
+                        }
+                    }
                 }
             }
-        } else {
+        }else {
             val file = createFile(info.saveDirPath, info.saveFileName)
             if (file != null && file.exists()) {
                 if (info.downloadLength != file.length()) {

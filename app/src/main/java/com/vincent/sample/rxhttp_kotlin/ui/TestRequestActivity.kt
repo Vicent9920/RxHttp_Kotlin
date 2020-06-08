@@ -113,7 +113,6 @@ class TestRequestActivity : AppCompatActivity() {
             getCurrentDate()
         }
 
-        RequestClientManager.refreshBaseUrl("http://www.google.com/")
     }
 
     /**
@@ -121,7 +120,7 @@ class TestRequestActivity : AppCompatActivity() {
      */
     private fun getCelebrities() {
         mRxLife.add(
-            RxHttp.request(FreeApi.api().getCelebrities()).listener(reqListener)
+            RxHttp.request(FreeApi.api().getCelebrities("wxarticle/chapters/json")).listener(reqListener)
                 .request(object : ResultCallback<List<Celebrity>> {
                     @SuppressLint("SetTextI18n")
                     override fun onSuccess(code: Int, data: List<Celebrity>?) {

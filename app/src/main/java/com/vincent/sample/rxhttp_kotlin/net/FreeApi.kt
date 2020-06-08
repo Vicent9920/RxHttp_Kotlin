@@ -36,8 +36,8 @@ object FreeApi: Api() {
          * 微信公众号列表
          */
         @Headers(Header.CACHE_ALIVE_SECOND + ":" + 10)
-        @GET("wxarticle/chapters/json")
-        fun getCelebrities(): Observable<ResponseBean<List<Celebrity>>>
+        @GET
+        fun getCelebrities(@Url url:String): Observable<ResponseBean<List<Celebrity>>>
 
         /**
          * banner内容

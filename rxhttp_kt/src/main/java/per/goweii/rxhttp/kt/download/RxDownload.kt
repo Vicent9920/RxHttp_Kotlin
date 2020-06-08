@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
  * <p>版本号：1<p>
  *
  */
-class RxDownload( val info: DownloadInfo) {
+class RxDownload private constructor( val info: DownloadInfo) {
     companion object{
         @JvmStatic
         fun create(info: DownloadInfo): RxDownload {
@@ -66,7 +66,7 @@ class RxDownload( val info: DownloadInfo) {
 
 
     fun start() {
-        if (mDisposableDownload != null && mDisposableDownload?.isDisposed() == false) {
+        if (mDisposableDownload != null && mDisposableDownload?.isDisposed == false) {
             return
         }
         Observable.create<String> { emitter ->
@@ -106,6 +106,8 @@ class RxDownload( val info: DownloadInfo) {
             override fun onNext(responseBody: ResponseBody) {
                 info.state = State.COMPLETION
                 mDownloadListener?.onCompletion(info)
+                mDisposableDownload?.dispose()
+                mDisposableDownload = null
             }
 
             override fun onError(e: Throwable) {
@@ -116,6 +118,8 @@ class RxDownload( val info: DownloadInfo) {
                     info.state = State.ERROR
                     mDownloadListener?.onError(info, e)
                 }
+                mDisposableDownload?.dispose()
+                mDisposableDownload = null
             }
 
             override fun onComplete() {}

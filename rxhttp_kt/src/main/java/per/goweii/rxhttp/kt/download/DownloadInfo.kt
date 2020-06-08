@@ -10,7 +10,11 @@ import per.goweii.rxhttp.kt.core.RxHttp
  * <p>版本号：1<p>
  *
  */
-data class DownloadInfo(var url:String,var saveDirPath:String? = null,var saveFileName:String? = null,var downloadLength:Long = 0L,var contentLength: Long = 0) {
+data class DownloadInfo @JvmOverloads constructor(var url:String,
+                                                  var saveDirPath:String? = null,
+                                                  var saveFileName:String? = null,
+                                                  var downloadLength:Long = 0L,
+                                                  var contentLength: Long = 0) {
 
     @JvmField
     var state: State = State.STOPPED
@@ -21,7 +25,7 @@ data class DownloadInfo(var url:String,var saveDirPath:String? = null,var saveFi
 }
 
 /**
- * 如果路径文件存在，但是断点续传时未传入已下载长度信息，此时的写入模式
+ * 如果需要断点续传下载，请设置 APPEND 默认值为 APPEND
  */
 enum class Mode {
     /**

@@ -1,6 +1,5 @@
 package per.goweii.rxhttp.kt.download.setting
 
-import per.goweii.rxhttp.kt.download.DownloadInfo
 import per.goweii.rxhttp.kt.download.Mode
 
 /**

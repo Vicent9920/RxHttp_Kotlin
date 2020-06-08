@@ -6,6 +6,8 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.KeyEvent
 import androidx.appcompat.app.AppCompatActivity
+import com.haoge.easyandroid.easy.EasyLog
+import com.haoge.easyandroid.easy.EasyToast
 import com.vincent.sample.rxhttp_kotlin.R
 import kotlinx.android.synthetic.main.activity_test_download.*
 import per.goweii.rxhttp.kt.core.RxHttp
@@ -17,7 +19,6 @@ import per.goweii.rxhttp.kt.download.utils.UnitFormatUtils
 class TestDownloadActivity : AppCompatActivity() {
     private val url =
         "https://imtt.dd.qq.com/16891/513D2C5324E6EBE77F94C85D7C76EBAE.apk?fsname=com.tencent.mobileqq_7.8.2_926.apk&csr=1bbd"
-    private val tag = "TestDownloadActivity"
     private var mRxDownload: RxDownload? = null
     private var isStart = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +27,9 @@ class TestDownloadActivity : AppCompatActivity() {
         progress_bar.max = 10000
         et_url.setText(url)
         // 可不设置，使用DefaultDownloadSetting
-        RxHttp.initDownload(object : DefaultDownloadSetting() {
-            override fun getTimeout(): Long {
-                return 60000
+        RxHttp.initDownload(object :DefaultDownloadSetting(){
+            override fun getDefaultDownloadMode(): Mode {
+                return Mode.RENAME
             }
         })
         val downloadInfo = getDownloadInfo()
@@ -49,6 +50,7 @@ class TestDownloadActivity : AppCompatActivity() {
             override fun onStarting(info: DownloadInfo?) {
                 tv_start_stop.text = "暂停下载"
                 tv_cancel.text = "取消下载"
+                isStart = true
             }
 
             override fun onDownloading(info: DownloadInfo?) {
@@ -59,6 +61,7 @@ class TestDownloadActivity : AppCompatActivity() {
                 saveDownloadInfo()
                 tv_start_stop.text = "开始下载"
                 tv_speed.text = ""
+                isStart = false
             }
 
             override fun onCanceled(info: DownloadInfo?) {
@@ -69,19 +72,24 @@ class TestDownloadActivity : AppCompatActivity() {
                 tv_speed.text = ""
                 tv_download_length.text = ""
                 tv_content_length.text = ""
+                EasyLog.DEFAULT.e("取消下载")
+                isStart = false
             }
 
             override fun onCompletion(info: DownloadInfo?) {
                 saveDownloadInfo()
                 tv_start_stop.text = "下载成功"
                 tv_speed.text = ""
+                EasyLog.DEFAULT.e("下载成功")
+                isStart = false
             }
 
             override fun onError(info: DownloadInfo?, e: Throwable?) {
                 saveDownloadInfo()
                 tv_start_stop.text = "开始下载"
                 tv_speed.text = ""
-                Log.e(tag,"onError",e)
+                EasyLog.DEFAULT.e("下载失败",e!!)
+                isStart = false
             }
         })?.setProgressListener(object :ProgressListener{
             override fun onProgress(progress: Float, downloadLength: Long, contentLength: Long) {
@@ -117,6 +125,7 @@ class TestDownloadActivity : AppCompatActivity() {
             progress_bar.progress = 0
             tv_start_stop.text = "开始下载"
             tv_cancel.text = "取消下载"
+            mRxDownload = RxDownload.create(DownloadInfo(et_url.text.toString()))
         }
 
 
@@ -125,14 +134,19 @@ class TestDownloadActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (event.action == KeyEvent.ACTION_DOWN) {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
-                if (isStart) {
-                    mRxDownload?.stop()
+                if(isStart){
+                    EasyToast.DEFAULT.show("我先给你暂停下载了")
                     isStart = false
-                    return false
+                    return true
                 }
             }
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cleanDownloadInfo()
     }
     private fun getDownloadInfo(): DownloadInfo? {
         val sp = PreferenceManager.getDefaultSharedPreferences(this)
