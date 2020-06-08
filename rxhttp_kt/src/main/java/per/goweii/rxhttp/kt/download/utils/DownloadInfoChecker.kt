@@ -21,7 +21,7 @@ object DownloadInfoChecker {
                         if(info.downloadLength == 0L){
                             info.downloadLength = file.length()
                         }else{
-                            info.downloadLength = info.contentLength-1
+                            info.downloadLength = info.contentLength
                         }
 
                     }
@@ -32,11 +32,8 @@ object DownloadInfoChecker {
                     }
                     else -> {
                         info.saveFileName = renameFileName(info.saveFileName)
-                        if(info.downloadLength == 0L){
-                            info.downloadLength = file.length()
-                        }else{
-                            info.downloadLength = info.contentLength-1
-                        }
+                        info.downloadLength = 0
+                        info.contentLength = 0
                     }
                 }
             }
