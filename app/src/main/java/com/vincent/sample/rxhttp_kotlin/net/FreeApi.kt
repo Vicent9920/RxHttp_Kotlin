@@ -2,8 +2,11 @@ package com.vincent.sample.rxhttp_kotlin.net
 
 import com.vincent.sample.rxhttp_kotlin.entity.*
 import io.reactivex.Observable
+import okhttp3.Callback
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import per.goweii.rxhttp.kt.request.Api
+import retrofit2.Call
 import retrofit2.http.*
 
 
@@ -73,11 +76,10 @@ object FreeApi: Api() {
          * http 请求 // http://www.mxnzp.com/api/holiday/single/20200102
          */
         @POST
-        fun test(@Body body: RequestBody,
-                 @retrofit2.http.Header("Authorization")author:String,
-                 @retrofit2.http.Header("Blade-Auth")blade:String,
-                 @retrofit2.http.Header("User-Type")type:String,
-                 @Url path: String): Observable<ResponseBean<Any>>
+        @FormUrlEncoded
+        fun test(@Field("uid")uid:String,
+                 @Field("pwd")pwd:String,
+                 @Url path: String): Observable<String>  //Call<ResponseBody>
 
         /**
          * 键		值
@@ -89,8 +91,8 @@ object FreeApi: Api() {
         fun uploadImg(@PartMap img: Map<String, RequestBody>): Observable<ResponseBean<UploadImgBean>>
     }
 
-    fun api(): Service {
-        return api(Service::class.java)
+    fun api(isGson:Boolean = true): Service {
+        return api(Service::class.java,isGson)
     }
 
 }

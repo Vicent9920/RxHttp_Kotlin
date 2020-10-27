@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
+import com.haoge.easyandroid.easy.EasyLog
 import com.vincent.sample.rxhttp_kotlin.R
 import com.vincent.sample.rxhttp_kotlin.entity.Banner
 import com.vincent.sample.rxhttp_kotlin.entity.Celebrity
@@ -17,6 +18,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import per.goweii.rxhttp.kt.core.RxHttp
 import per.goweii.rxhttp.kt.core.RxLife
@@ -27,6 +29,9 @@ import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
 import per.goweii.rxhttp.kt.request.setting.DefaultRequestSetting
 import per.goweii.rxhttp.kt.request.setting.ParameterGetter
 import per.goweii.rxhttp.kt.request.utils.RequestBodyUtils.builder
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.File
 import java.text.SimpleDateFormat
@@ -214,23 +219,24 @@ class TestRequestActivity : AppCompatActivity() {
         map["gisY"] = 2.0
         map["clzt"] = "0304"
         mRxLife.add(
-            RxHttp.request(
-                FreeApi.api()
-                    .test(Gson().toJson(map).toRequestBody("application/json".toMediaTypeOrNull()),
-                        "Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRfaWQiOiIwMDAwMDAiLCJ1c2VyX25hbWUiOiJ0YW5naHVhIiwiZGVwdF9sb24iOiIxMDMuOTU3MzIiLCJyZWFsX25hbWUiOiLnrqHnkIblkZgiLCJhdmF0YXIiOiIiLCJhdXRob3JpdGllcyI6WyLkuK3pmJ_nrqHnkIblkZgiXSwiY2xpZW50X2lkIjoic2FiZXIiLCJyb2xlX25hbWUiOiLkuK3pmJ_nrqHnkIblkZgiLCJsaWNlbnNlIjoicG93ZXJlZCBieSBibGFkZXgiLCJ1c2VyX2lkIjoiMTEyMzU5ODgyMTczODY3NTIwOCIsInJvbGVfaWQiOiI2OThlOGE5YjU3YzU2ZGM4Njc0Mzg4MTA1ZDZiYjE5NSIsInNjb3BlIjpbImFsbCJdLCJuaWNrX25hbWUiOiLllJDmoaYiLCJjdGkiOnsibW0iOiIiLCJqbnptYyI6IiIsImFndGlkIjoiIiwidXJsIjoiIn0sInBtcV91aWQiOiIxMTIzNTk4ODIxNzM4Njc1MjA4fGFwcCIsInVzZXJUeXBlIjoiYXBwIiwiZGVwdF9pZCI6IjM3OTYwNTAzODAiLCJjenQiOnt9LCJkZXB0X2xhdCI6IjMwLjk1NjMxMiIsImp0aSI6ImQ4N2IxNTM5LWVkOTItNDYwOC1hZmZmLTZlMjZiNjQyMWYwNyIsImFjY291bnQiOiJ0YW5naHVhIn0.rYr44HueJFYIqGsAOXXXV8UDTE_gLjGcmgHajkxQcOE",
-                        "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZW5hbnRfaWQiOiIwMDAwMDAiLCJ1c2VyX25hbWUiOiJ0YW5naHVhIiwiZGVwdF9sb24iOiIxMDMuOTU3MzIiLCJyZWFsX25hbWUiOiLnrqHnkIblkZgiLCJhdmF0YXIiOiIiLCJhdXRob3JpdGllcyI6WyLkuK3pmJ_nrqHnkIblkZgiXSwiY2xpZW50X2lkIjoic2FiZXIiLCJyb2xlX25hbWUiOiLkuK3pmJ_nrqHnkIblkZgiLCJsaWNlbnNlIjoicG93ZXJlZCBieSBibGFkZXgiLCJ1c2VyX2lkIjoiMTEyMzU5ODgyMTczODY3NTIwOCIsInJvbGVfaWQiOiI2OThlOGE5YjU3YzU2ZGM4Njc0Mzg4MTA1ZDZiYjE5NSIsInNjb3BlIjpbImFsbCJdLCJuaWNrX25hbWUiOiLllJDmoaYiLCJjdGkiOnsibW0iOiIiLCJqbnptYyI6IiIsImFndGlkIjoiIiwidXJsIjoiIn0sInBtcV91aWQiOiIxMTIzNTk4ODIxNzM4Njc1MjA4fGFwcCIsInVzZXJUeXBlIjoiYXBwIiwiZGVwdF9pZCI6IjM3OTYwNTAzODAiLCJjenQiOnt9LCJkZXB0X2xhdCI6IjMwLjk1NjMxMiIsImp0aSI6ImQ4N2IxNTM5LWVkOTItNDYwOC1hZmZmLTZlMjZiNjQyMWYwNyIsImFjY291bnQiOiJ0YW5naHVhIn0.rYr44HueJFYIqGsAOXXXV8UDTE_gLjGcmgHajkxQcOE",
-                        "app","http://192.168.3.99:50003/blade-base/zzclxx/setczzt"))
+            RxHttp.customRequest(
+                FreeApi.api(false)
+                    .test(
+                        "admin","admin","http://47.99.221.176:8927/app/array"))
                 .listener(reqListener)
-                .request(object :ResultCallback<Any>{
-                    override fun onSuccess(code: Int, data: Any?) {
-                        tv_log.text = "${tv_log.text}\nonSuccess {code-${code} data-${Gson().toJson(data)}}"
-                    }
-
-                    override fun onFailed(code: Int, msg: String?) {
-                        tv_log.text = "${tv_log.text}\nonFailed {code-${code} msg-${msg}}"
-                    }
-                }))
-
+                .customEntityRequest {
+                    EasyLog.DEFAULT.e(it)
+                })
+//        FreeApi.api().test("admin","admin","http://47.99.221.176:8927/app/array").enqueue(object :
+//            Callback<ResponseBody>{
+//            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+//                EasyLog.DEFAULT.e(response.body()?.string())
+//            }
+//
+//            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+//                EasyLog.DEFAULT.e(t.message)
+//            }
+//        })
 //        mRxLife.add(
 //            RxHttp.request(
 //                FreeApi.api()

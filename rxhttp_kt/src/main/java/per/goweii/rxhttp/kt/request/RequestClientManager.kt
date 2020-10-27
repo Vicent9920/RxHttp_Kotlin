@@ -15,6 +15,7 @@ import per.goweii.rxhttp.kt.request.interceptor.*
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -32,11 +33,11 @@ object RequestClientManager : BaseClientManager() {
     private var mRetrofit: Retrofit = create()
     private val mRetrofitMap = HashMap<Class<*>, Retrofit>()
     private var mOkHttpClient: OkHttpClient? = null
-    override fun create(): Retrofit {
-        return create(RxHttp.getRequestSetting()?.getBaseUrl()!!)
+    override fun create(isGson:Boolean): Retrofit {
+        return create(RxHttp.getRequestSetting()?.getBaseUrl()!!,isGson)
     }
 
-    private fun create(baseUrl: String): Retrofit {
+    private fun create(baseUrl: String,isGson: Boolean): Retrofit {
         if (mOkHttpClient == null) {
             mOkHttpClient = createOkHttpClient()
         }
@@ -44,12 +45,16 @@ object RequestClientManager : BaseClientManager() {
             .client(mOkHttpClient)
             .baseUrl(checkBaseUrl(baseUrl))
         builder.addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        val gson = RxHttp.getRequestSetting()?.getGson() ?: Gson()
-        builder.addConverterFactory(GsonConverterFactory.create(gson))
+        if(isGson){
+            val gson = RxHttp.getRequestSetting()?.getGson() ?: Gson()
+            builder.addConverterFactory(GsonConverterFactory.create(gson))
+        }else{
+            builder.addConverterFactory(ScalarsConverterFactory.create())
+        }
         return builder.build()
     }
     fun refreshBaseUrl(baseUrl: String){
-        mRetrofit = create(baseUrl)
+        mRetrofit = create(baseUrl,true)
     }
 
     /**
@@ -59,11 +64,11 @@ object RequestClientManager : BaseClientManager() {
      * @param <T>   Api接口
      * @return Api接口实例
     </T> */
-    internal fun <T> getService(clazz: Class<T>): T {
-        return getRetrofit(clazz).create(clazz)
+    internal fun <T> getService(clazz: Class<T>,isGson: Boolean): T {
+        return getRetrofit(clazz,isGson).create(clazz)
     }
 
-    private fun getRetrofit(clazz: Class<*>?): Retrofit {
+    private fun getRetrofit(clazz: Class<*>?,isGson: Boolean): Retrofit {
 
         clazz ?: return mRetrofit
         var retrofit: Retrofit? = null
@@ -95,7 +100,7 @@ object RequestClientManager : BaseClientManager() {
         if (baseUrl == null) {
             return mRetrofit
         }
-        retrofit = create(baseUrl)
+        retrofit = create(baseUrl,isGson)
         mRetrofitMap[clazz] = retrofit
         return retrofit
     }

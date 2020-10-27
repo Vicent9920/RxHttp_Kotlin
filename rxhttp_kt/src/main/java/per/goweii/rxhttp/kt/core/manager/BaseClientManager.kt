@@ -11,5 +11,5 @@ import retrofit2.Retrofit
  *
  */
 abstract class BaseClientManager {
-    abstract fun create(): Retrofit
+    abstract fun create(isGson:Boolean = true): Retrofit
 }

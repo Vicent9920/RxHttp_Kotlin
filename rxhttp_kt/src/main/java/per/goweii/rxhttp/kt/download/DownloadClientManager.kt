@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 object DownloadClientManager : BaseClientManager() {
     private val mRetrofit: Retrofit = create()
-    override fun create(): Retrofit {
+    override fun create(isGson:Boolean): Retrofit {
         return Retrofit.Builder()
                 .client(createOkHttpClient())
                 .baseUrl(checkBaseUrl(RxHttp.getDownloadSetting().getBaseUrl()))

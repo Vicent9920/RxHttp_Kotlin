@@ -35,7 +35,7 @@ open class Api {
      * @param <T>   ServiceInterface的名字
      * @return 接口实例
     </T> */
-     open fun <T> api(clazz: Class<T>): T {
-        return RequestClientManager.getService(clazz)
+     open fun <T> api(clazz: Class<T>,isGson:Boolean = true): T {
+        return RequestClientManager.getService(clazz,isGson)
     }
 }

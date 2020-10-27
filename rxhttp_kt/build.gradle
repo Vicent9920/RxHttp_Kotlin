@@ -40,6 +40,7 @@ dependencies {
     api 'com.squareup.retrofit2:retrofit:2.7.1'
     api 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
     api 'com.squareup.retrofit2:converter-gson:2.7.1'
+    api 'com.squareup.retrofit2:converter-scalars:2.9.0'
 
     // OkHttp
     api 'com.squareup.okhttp3:logging-interceptor:4.3.0'
