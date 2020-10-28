@@ -13,6 +13,8 @@ import com.vincent.sample.rxhttp_kotlin.entity.Celebrity
 import com.vincent.sample.rxhttp_kotlin.entity.RegisterBean
 import com.vincent.sample.rxhttp_kotlin.entity.UploadImgBean
 import com.vincent.sample.rxhttp_kotlin.net.FreeApi
+import com.vincent.sample.rxhttp_kotlin.net.MessageApi
+import com.vincent.sample.rxhttp_kotlin.net.Service
 import kotlinx.android.synthetic.main.activity_test_request.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -90,6 +92,10 @@ class TestRequestActivity : AppCompatActivity() {
                 val urls: MutableMap<String, String> = HashMap(1)
                 urls[FreeApi.Config.BASE_URL_OTHER_NAME] = FreeApi.Config.BASE_URL_OTHER
                 return urls
+            }
+
+            override fun getServiceBaseUrl(): Map<Class<*>, String> {
+                return mapOf(Pair(Service::class.java,"http://47.99.221.176:8927/"))
             }
 
             override fun getWriteTimeout(): Long {
@@ -220,9 +226,9 @@ class TestRequestActivity : AppCompatActivity() {
         map["clzt"] = "0304"
         mRxLife.add(
             RxHttp.customRequest(
-                FreeApi.api(false)
+                MessageApi.api(false)
                     .test(
-                        "admin","admin","http://47.99.221.176:8927/app/array"))
+                        "admin","admin"))
                 .listener(reqListener)
                 .customEntityRequest {
                     EasyLog.DEFAULT.e(it)

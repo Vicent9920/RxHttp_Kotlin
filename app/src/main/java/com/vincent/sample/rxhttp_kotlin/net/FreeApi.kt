@@ -75,11 +75,10 @@ object FreeApi: Api() {
         /**
          * http 请求 // http://www.mxnzp.com/api/holiday/single/20200102
          */
-        @POST
+        @POST("app/array")
         @FormUrlEncoded
         fun test(@Field("uid")uid:String,
-                 @Field("pwd")pwd:String,
-                 @Url path: String): Observable<String>  //Call<ResponseBody>
+                 @Field("pwd")pwd:String): Observable<String>  //Call<ResponseBody>
 
         /**
          * 键		值

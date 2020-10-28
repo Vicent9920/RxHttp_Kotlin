@@ -87,7 +87,7 @@ object RequestClientManager : BaseClientManager() {
             return retrofit
         }
         val baseUrlMap = RxHttp.getRequestSetting()?.getServiceBaseUrl()
-        if (baseUrlMap.isNullOrEmpty().not()) {
+        if (baseUrlMap.isNullOrEmpty()) {
             return mRetrofit
         }
         var baseUrl: String? = null
