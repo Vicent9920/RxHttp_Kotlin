@@ -11,7 +11,7 @@ import per.goweii.rxhttp.kt.request.exception.ExceptionHandle
  * <p>@author 烤鱼<p>
  * <p>@date 2019/12/30 0030 <p>
  * <p>@update 2019/12/30 0030<p>
- * <p>版本号：1<p>
+ * <p>版本号：1.01<p>
  *
  */
 abstract class DefaultRequestSetting : RequestSetting{
@@ -77,6 +77,8 @@ abstract class DefaultRequestSetting : RequestSetting{
     override fun <E : ExceptionHandle> getExceptionHandle(t:Throwable): E? {
         return null
     }
+
+    override fun getRealErrorMsg() = false
 
     override fun getInterceptors(): Array<Interceptor> {
         return arrayOf()

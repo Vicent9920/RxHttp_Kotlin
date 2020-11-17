@@ -84,13 +84,13 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 }
             }
         }, { t ->
-            var handle: ExceptionHandle =
+            val handle: ExceptionHandle =
                 RxHttp.getRequestSetting()?.getExceptionHandle(t) ?: ExceptionHandle(t)
             if (t is HttpException) {
                 if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
                     mListener?.onError(handle)
-                    val errorMsg = t.response()?.errorBody()?.string()
-                    callback.onFailed(t.code(), errorMsg ?: t.message())
+//                    val errorMsg = t.response()?.errorBody()?.string()
+                    callback.onFailed(t.code(),  t.message())
                 } else
                     mListener?.onFinish()
 

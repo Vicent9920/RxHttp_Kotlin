@@ -1,7 +1,6 @@
 package per.goweii.rxhttp.kt.request.setting
 
 import com.google.gson.Gson
-import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -33,7 +32,6 @@ interface RequestSetting {
     fun getRedirectBaseUrl(): Map<String, String>
 
 
-
     /**
      * 用于对一组接口设置BaseUrl
      * 这种设置方法对资源占用较大，实现方式为每组的请求创建不同的Retrofit和OkHttpClient实例，设置均相同，及下面的设置
@@ -44,8 +42,9 @@ interface RequestSetting {
     fun getServiceBaseUrl(): Map<Class<*>, String>
 
     fun getSuccessCode(): Int
+
     /** 参数错误、token失效等错误码 **/
-    fun getMultiHttpCode(): ((code:Int) -> Boolean)
+    fun getMultiHttpCode(): ((code: Int) -> Boolean)
 
     fun getMultiSuccessCode(): IntArray
 
@@ -91,7 +90,9 @@ interface RequestSetting {
 
     fun getDynamicHeaderParameter(): Map<String, ParameterGetter>
 
-    fun <E : ExceptionHandle> getExceptionHandle(t:Throwable): E?
+    fun <E : ExceptionHandle> getExceptionHandle(t: Throwable): E?
+
+    fun getRealErrorMsg(): Boolean
 
 
     fun getInterceptors(): Array<Interceptor>
@@ -126,6 +127,6 @@ interface RequestSetting {
     /**
      * 是否打开调试模式
      */
-    fun isDebug(): Pair<Boolean,HttpLoggingInterceptor.Level>
+    fun isDebug(): Pair<Boolean, HttpLoggingInterceptor.Level>
 }
 
