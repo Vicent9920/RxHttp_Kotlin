@@ -20,7 +20,10 @@ import retrofit2.HttpException
  * <p>版本号：1<p>
  *
  */
-class RxRequest<T, E> where E : BaseResponse<T> {
+class RxRequest<T, E> private constructor(
+    observable: Observable<E>?,
+    observable2: Observable<T>?
+) where E : BaseResponse<T> {
 
     private var mListener: RequestListener? = null
     private var mRxLife: RxLife? = null
@@ -40,7 +43,7 @@ class RxRequest<T, E> where E : BaseResponse<T> {
     private var mObservable: Observable<E>? = null
     private var mObservable2: Observable<T>? = null
 
-    private constructor(observable: Observable<E>?, observable2: Observable<T>?) {
+    init {
         if (observable2 == null) {
             this.mObservable =
                 observable!!.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -89,8 +92,13 @@ class RxRequest<T, E> where E : BaseResponse<T> {
             if (t is HttpException) {
                 if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
                     mListener?.onError(handle)
-//                    val errorMsg = t.response()?.errorBody()?.string()
-                    callback.onFailed(t.code(),  t.message())
+                    if(RxHttp.getRequestSetting()?.getRealErrorMsg() == true){
+                        val errorMsg = t.response()?.errorBody()?.string()
+                        callback.onFailed(t.code(),  errorMsg?:t.message())
+                    }else{
+                        callback.onFailed(t.code(),  t.message())
+                    }
+
                 } else
                     mListener?.onFinish()
 
@@ -120,6 +128,7 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                 // 无法获取实体，建议直接返回字符串
                 if (RxHttp.getRequestSetting()?.getMultiHttpCode()?.invoke(t.code()) == false) {
                     mListener?.onError(handle)
+                    val realMsg = RxHttp.getRequestSetting()?.getRealErrorMsg()?:false
                     val errorMsg = t.response()?.errorBody()?.string()
                     val result = object : BaseResponse<T>() {
                         override fun getCode(): Int {
@@ -139,7 +148,12 @@ class RxRequest<T, E> where E : BaseResponse<T> {
                         }
 
                         override fun getMsg(): String? {
-                            return errorMsg ?: t.message()
+                            return if(realMsg){
+                                errorMsg ?: t.message()
+                            }else{
+                                t.message()
+                            }
+
                         }
 
                         override fun setMsg(msg: String?) {
